@@ -73,5 +73,20 @@ namespace legendarios_API.Repository
             }
         }
 
+        public bool LoginExiste(string login)
+        {
+            var sql = "SELECT COUNT(*) FROM usuarios WHERE n_lgnd = @login AND deletado = 0";
+            var count = this._conn.ExecuteScalar<int>(sql, new { login });
+            return count > 0;
+        }
+
+        public void CriarUsuario(string login, string senha, int nivelPermissao, int idUsuarioCriacao)
+        {
+            var sql = @"INSERT INTO usuarios (n_lgnd, chave, nivel_permissao, id_usuario_criacao, deletado)
+                        VALUES (@login, @senha, @nivelPermissao, @idUsuarioCriacao, 0)";
+
+            this._conn.Execute(sql, new { login, senha, nivelPermissao, idUsuarioCriacao });
+        }
+
     }
 }

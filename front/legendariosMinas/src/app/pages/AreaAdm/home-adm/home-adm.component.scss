@@ -1,3 +1,14 @@
+:host {
+  display: block;
+}
+
+.dashboard-content {
+  padding-top: 90px;
+  padding-bottom: 2rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
 .scroll-grey {
   &::-webkit-scrollbar {
     width: 5px;

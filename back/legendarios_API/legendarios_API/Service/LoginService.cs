@@ -76,5 +76,20 @@ namespace legendarios_API.Service
             TimeSpan diferenca = DateTime.Now - token.dt_acesso;
             return diferenca <= TimeSpan.FromMinutes(15);
         }
+
+        public (bool sucesso, string erro) CriarUsuario(CriarUsuarioDTO dto, int idUsuarioCriacao)
+        {
+            if (string.IsNullOrWhiteSpace(dto.login))
+                return (false, "Login não pode ser vazio.");
+
+            if (string.IsNullOrWhiteSpace(dto.senha) || dto.senha.Length < 6)
+                return (false, "Senha deve ter pelo menos 6 caracteres.");
+
+            if (loginRepository.LoginExiste(dto.login))
+                return (false, "Já existe um usuário com esse login.");
+
+            loginRepository.CriarUsuario(dto.login, dto.senha, dto.nivel_permissao, idUsuarioCriacao);
+            return (true, "");
+        }
     }
 }

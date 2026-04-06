@@ -1,11 +1,16 @@
-﻿<div class="container-fluid py-4">
+﻿<div class="container-fluid dashboard-content">
 
   <!-- Título -->
   <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
     <h2 class="mb-0">Dashboard — Gerenciamento de Cadastros</h2>
-    <a routerLink="/pre-cadastro" target="_blank" class="btn btn-sm btn-outline-primary">
-      Ver página de cadastro público
-    </a>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-primary" (click)="abrirModalUsuario()">
+        + Novo Usuário
+      </button>
+      <a routerLink="/pre-cadastro" target="_blank" class="btn btn-sm btn-outline-primary">
+        Ver página de cadastro público
+      </a>
+    </div>
   </div>
 
   <!-- Cards de Estatísticas -->
@@ -282,4 +287,62 @@
     </div>
   </div>
 
+</div>
+
+<!-- ══════════════════ Modal Novo Usuário ══════════════════ -->
+<div class="modal-backdrop fade show" *ngIf="modalUsuarioVisivel" style="z-index:1040;"></div>
+<div class="modal d-block" tabindex="-1" *ngIf="modalUsuarioVisivel" style="z-index:1050;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Novo Usuário Administrador</h5>
+        <button type="button" class="btn-close" (click)="fecharModalUsuario()"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="alert alert-danger py-2" *ngIf="erroUsuario">{{ erroUsuario }}</div>
+        <div class="alert alert-success py-2" *ngIf="sucessoUsuario">{{ sucessoUsuario }}</div>
+
+        <div class="mb-3">
+          <label class="form-label">Login <span class="text-danger">*</span></label>
+          <input class="form-control" [(ngModel)]="novoUsuario.login"
+                 placeholder="Ex: joao.silva" autocomplete="username">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Senha <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" [(ngModel)]="novoUsuario.senha"
+                 placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Confirmar Senha <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" [(ngModel)]="novoUsuario.confirmaSenha"
+                 placeholder="Repita a senha" autocomplete="new-password">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Nível de Permissão</label>
+          <select class="form-select" [(ngModel)]="novoUsuario.nivel_permissao">
+            <option [ngValue]="1">1 — Administrador</option>
+            <option [ngValue]="0">0 — Visualizador</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fecharModalUsuario()" [disabled]="salvandoUsuario">
+          Cancelar
+        </button>
+        <button class="btn btn-primary" (click)="salvarNovoUsuario()" [disabled]="salvandoUsuario">
+          <span *ngIf="salvandoUsuario" class="spinner-border spinner-border-sm me-1"></span>
+          {{ salvandoUsuario ? 'Salvando...' : 'Criar Usuário' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
 </div>

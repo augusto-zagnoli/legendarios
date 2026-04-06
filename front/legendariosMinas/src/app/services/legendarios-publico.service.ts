@@ -53,4 +53,8 @@ export class LegendariosPublicoService {
   atualizarStatus(idLegendario: number, status: string): Observable<any> {
     return this.http.patch(`${this.base}dashboard/status/${idLegendario}`, { status });
   }
+
+  criarUsuario(login: string, senha: string, nivelPermissao: number): Observable<any> {
+    return this.http.post(`${environment.baseURL}adm-usuarios`, { login, senha, nivel_permissao: nivelPermissao });
+  }
 }

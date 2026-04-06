@@ -174,4 +174,54 @@ export class HomeAdmComponent implements OnInit {
   get nivelAdmin(): boolean {
     return (this.authService.getUsuario()?.nivelPermissao ?? 0) === 1;
   }
+
+  // ─── Modal Novo Usuário ───────────────────────────────────────────
+  modalUsuarioVisivel = false;
+  novoUsuario = { login: '', senha: '', confirmaSenha: '', nivel_permissao: 0 };
+  salvandoUsuario = false;
+  erroUsuario = '';
+  sucessoUsuario = '';
+
+  abrirModalUsuario(): void {
+    this.novoUsuario = { login: '', senha: '', confirmaSenha: '', nivel_permissao: 0 };
+    this.erroUsuario = '';
+    this.sucessoUsuario = '';
+    this.modalUsuarioVisivel = true;
+  }
+
+  fecharModalUsuario(): void {
+    this.modalUsuarioVisivel = false;
+  }
+
+  salvarNovoUsuario(): void {
+    this.erroUsuario = '';
+    this.sucessoUsuario = '';
+
+    if (!this.novoUsuario.login.trim()) {
+      this.erroUsuario = 'Login é obrigatório.'; return;
+    }
+    if (this.novoUsuario.senha.length < 6) {
+      this.erroUsuario = 'Senha deve ter pelo menos 6 caracteres.'; return;
+    }
+    if (this.novoUsuario.senha !== this.novoUsuario.confirmaSenha) {
+      this.erroUsuario = 'As senhas não coincidem.'; return;
+    }
+
+    this.salvandoUsuario = true;
+    this.service.criarUsuario(
+      this.novoUsuario.login,
+      this.novoUsuario.senha,
+      this.novoUsuario.nivel_permissao
+    ).subscribe({
+      next: (res) => {
+        this.salvandoUsuario = false;
+        this.sucessoUsuario = 'Usuário criado com sucesso!';
+        setTimeout(() => this.fecharModalUsuario(), 1500);
+      },
+      error: (err) => {
+        this.salvandoUsuario = false;
+        this.erroUsuario = err?.error?.mensagem || 'Erro ao criar usuário.';
+      }
+    });
+  }
 }
