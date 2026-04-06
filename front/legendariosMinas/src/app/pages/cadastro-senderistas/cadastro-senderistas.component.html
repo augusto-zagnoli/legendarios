@@ -26,7 +26,7 @@
             </div>
           </div>
 
-          <div class="col-6" [class.required]="this.verificaForm && formGroup.controls['email'].getError('required')">
+          <div class="col-12 col-sm-6" [class.required]="this.verificaForm && formGroup.controls['email'].getError('required')">
             <label for="email" class="form-label">E-mail</label>
             <input type="email" class="form-control" formControlName="email" id="email" placeholder="you@example.com">
             <div class="invalid-feedback">
@@ -34,7 +34,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['cpf'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['cpf'].getError('required')">
             <label for="cpf" class="form-label">CPF</label>
             <input type="text" class="form-control" id="cpf" formControlName="cpf" placeholder="1234 Main St" required>
             <div class="invalid-feedback">
@@ -42,7 +42,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['rg'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['rg'].getError('required')">
             <label for="rg" class="form-label">RG</label>
             <input type="text" class="form-control" id="rg" formControlName="rg" placeholder="1234 Main St" required>
             <div class="invalid-feedback">
@@ -50,7 +50,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['dataespedicaorg'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['dataespedicaorg'].getError('required')">
             <label for="dataespedicaorg" class="form-label">Data Expdição</label>
             <input type="date" class="form-control" id="dataespedicaorg" formControlName="dataespedicaorg" required>
             <div class="invalid-feedback">
@@ -58,7 +58,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['rgespedidopor'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['rgespedidopor'].getError('required')">
             <label for="rgespedidopor" class="form-label">Expedido Por</label>
             <input type="text" class="form-control" id="rgespedidopor" formControlName="rgespedidopor" placeholder="SSP"
               required>
@@ -67,7 +67,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['datanascimento'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['datanascimento'].getError('required')">
             <label for="datanascimento" class="form-label">Data Nascimento</label>
             <input type="date" class="form-control" id="datanascimento" formControlName="datanascimento" required>
             <div class="invalid-feedback">
@@ -75,7 +75,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['idade'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['idade'].getError('required')">
             <label for="idade" class="form-label">Idade</label>
             <input type="text" class="form-control" id="idade" formControlName="idade" placeholder="27 anos" required>
             <div class="invalid-feedback">
@@ -83,7 +83,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['celular'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['celular'].getError('required')">
             <label for="celular" class="form-label">Celular</label>
             <input type="text" class="form-control" id="celular" formControlName="celular"
               placeholder="31 99291 . . . " required>
@@ -92,7 +92,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['nacionalidade'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['nacionalidade'].getError('required')">
             <label for="nacionalidade" class="form-label">Nacionalidade</label>
             <input type="text" class="form-control" id="nacionalidade" formControlName="nacionalidade"
               placeholder="Brasileira" required>
@@ -152,7 +152,7 @@
 
           <hr class="my-4">
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['profissao'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['profissao'].getError('required')">
             <label for="profissao" class="form-label">Profissão</label>
             <input type="text" class="form-control" id="profissao" formControlName="profissao" placeholder="Engenheiro"
               required>
@@ -161,7 +161,7 @@
             </div>
           </div>
 
-          <div class="col-3" [class.required]="this.verificaForm && formGroup.controls['religiao'].getError('required')">
+          <div class="col-12 col-sm-6 col-md-3" [class.required]="this.verificaForm && formGroup.controls['religiao'].getError('required')">
             <label for="religiao" class="form-label">Religião</label>
             <input type="text" class="form-control" id="religiao" formControlName="religiao" placeholder="Cristao"
               required>

@@ -26,6 +26,10 @@ export class HomeAdmComponent implements OnInit {
     { label: 'Reprovados', data: 0, color: '#d9534f' },
   ];
 
+  // Navegação sidebar
+  secaoAtiva: 'dashboard' | 'cadastros' | 'anuncios' | 'usuarios' = 'dashboard';
+  sidebarCollapsed = false;
+
   // Tabela
   abaAtiva: 'pendente' | 'aprovado' | 'reprovado' = 'pendente';
   listaExibida: any[] = [];
@@ -153,6 +157,23 @@ export class HomeAdmComponent implements OnInit {
     });
   }
 
+  irParaCadastros(): void {
+    this.secaoAtiva = 'cadastros';
+    if (this.abaAtiva !== 'pendente' && this.abaAtiva !== 'aprovado' && this.abaAtiva !== 'reprovado') {
+      this.carregarAba('pendente');
+    }
+  }
+
+  irParaAnuncios(): void {
+    this.secaoAtiva = 'anuncios';
+    this.carregarAbaAnuncios();
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login-adm']);
+  }
+
   aprovar(id: number): void {
     this.service.atualizarStatus(id, 'aprovado').subscribe({
       next: () => { this.carregarEstatisticas(); this.carregarAba(this.abaAtiva); }
@@ -222,6 +243,76 @@ export class HomeAdmComponent implements OnInit {
         this.salvandoUsuario = false;
         this.erroUsuario = err?.error?.mensagem || 'Erro ao criar usuário.';
       }
+    });
+  }
+
+  // ─── Anúncios ───────────────────────────────────────────────────
+  listaAnuncios: any[] = [];
+  carregandoAnuncios = false;
+  modalAnuncioVisivel = false;
+  salvandoAnuncio = false;
+  erroAnuncio = '';
+  anuncioForm: any = { titulo: '', imagem_url: '', texto: '', link: '', ativo: true, ordem: 0 };
+
+  carregarAbaAnuncios(): void {
+    this.carregandoAnuncios = true;
+    this.service.getAnunciosAdm().subscribe({
+      next: (res) => {
+        this.listaAnuncios = res.sucesso ? (res.data ?? []) : [];
+        this.carregandoAnuncios = false;
+      },
+      error: () => { this.carregandoAnuncios = false; }
+    });
+  }
+
+  novoAnuncio(): void {
+    this.anuncioForm = { titulo: '', imagem_url: '', texto: '', link: '', ativo: true, ordem: 0 };
+    this.erroAnuncio = '';
+    this.modalAnuncioVisivel = true;
+  }
+
+  editarAnuncio(a: any): void {
+    this.anuncioForm = { ...a };
+    this.erroAnuncio = '';
+    this.modalAnuncioVisivel = true;
+  }
+
+  fecharModalAnuncio(): void {
+    this.modalAnuncioVisivel = false;
+  }
+
+  salvarAnuncio(): void {
+    this.erroAnuncio = '';
+    if (!this.anuncioForm.titulo?.trim()) { this.erroAnuncio = 'Título é obrigatório.'; return; }
+    if (!this.anuncioForm.imagem_url?.trim()) { this.erroAnuncio = 'URL da imagem é obrigatória.'; return; }
+    if (!this.anuncioForm.texto?.trim()) { this.erroAnuncio = 'Texto é obrigatório.'; return; }
+
+    this.salvandoAnuncio = true;
+    const obs = this.anuncioForm.id_anuncio
+      ? this.service.atualizarAnuncio(this.anuncioForm)
+      : this.service.criarAnuncio(this.anuncioForm);
+
+    obs.subscribe({
+      next: (res) => {
+        this.salvandoAnuncio = false;
+        if (res.sucesso) {
+          this.fecharModalAnuncio();
+          this.carregarAbaAnuncios();
+        } else {
+          this.erroAnuncio = res.erro || 'Erro ao salvar.';
+        }
+      },
+      error: () => {
+        this.salvandoAnuncio = false;
+        this.erroAnuncio = 'Erro ao conectar com o servidor.';
+      }
+    });
+  }
+
+  confirmarDeletarAnuncio(id: number): void {
+    if (!confirm('Tem certeza que deseja excluir este anúncio?')) return;
+    this.service.deletarAnuncio(id).subscribe({
+      next: () => this.carregarAbaAnuncios()
     });
   }
 }

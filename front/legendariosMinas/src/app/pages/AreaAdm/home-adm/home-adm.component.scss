@@ -2,34 +2,163 @@
   display: block;
 }
 
-.dashboard-content {
-  padding-top: 90px;
-  padding-bottom: 2rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+// ─── Layout wrapper ────────────────────────────────────────────────
+.adm-wrapper {
+  display: flex;
+  min-height: 100vh;
+  padding-top: 70px;
+  background: #f4f6fb;
 }
 
+// ─── Sidebar ───────────────────────────────────────────────────────
+.adm-sidebar {
+  width: 230px;
+  min-width: 230px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease, min-width 0.25s ease;
+  overflow: hidden;
+
+  &.collapsed {
+    width: 58px;
+    min-width: 58px;
+
+    .sidebar-label,
+    .sidebar-badge {
+      display: none;
+    }
+
+    .sidebar-brand img {
+      margin: 0 auto;
+      display: block;
+    }
+  }
+}
+
+.sidebar-brand {
+  padding: 1.2rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0.5rem 0;
+  margin: 0;
+  flex: 1;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.1rem;
+    cursor: pointer;
+    color: #bbb;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+    }
+
+    &.active {
+      background: rgba(255,193,7,0.18);
+      color: #ffc107;
+      font-weight: 600;
+    }
+  }
+}
+
+.sidebar-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  padding: 0.75rem 0.7rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+// ─── Mobile toggle button ──────────────────────────────────────────
+.sidebar-toggle-btn {
+  display: none;
+  position: fixed;
+  top: 75px;
+  left: 8px;
+  z-index: 1000;
+  background: #1a1a2e;
+  color: #ffc107;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+// ─── Main content area ─────────────────────────────────────────────
+.adm-main {
+  flex: 1;
+  padding: 2rem 1.5rem;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+// ─── Section title ─────────────────────────────────────────────────
+.section-title {
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  color: #1a1a2e;
+}
+
+// ─── Dashboard shortcut cards ──────────────────────────────────────
+.adm-shortcut {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+  }
+}
+
+// ─── Scrollbar ─────────────────────────────────────────────────────
 .scroll-grey {
-  &::-webkit-scrollbar {
-    width: 5px;
-  }
-
-  &::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 10px white;
-    border-radius: 10px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #dedede;
-    border-radius: 10px;
-  }
-
-  // Works on firefox
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { box-shadow: inset 0 0 10px white; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb { background: #dedede; border-radius: 10px; }
   scrollbar-color: #dedede white;
   scrollbar-width: thin;
 }
 
-.orcamentos {
-  max-height: 400px;
-  overflow-y: auto;
+// ─── Mobile ────────────────────────────────────────────────────────
+@media (max-width: 767px) {
+  .adm-sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    height: calc(100vh - 70px);
+    z-index: 500;
+
+    &:not(.collapsed) {
+      box-shadow: 4px 0 20px rgba(0,0,0,0.35);
+    }
+
+    &.collapsed {
+      width: 0;
+      min-width: 0;
+    }
+  }
+
+  .sidebar-toggle-btn {
+    display: block;
+  }
+
+  .adm-main {
+    padding: 1rem;
+    margin-left: 0;
+  }
 }

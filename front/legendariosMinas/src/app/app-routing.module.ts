@@ -10,6 +10,7 @@ import { StatusPagamentoComponent } from './pages/cadastro-senderistas/pagamento
 import { HomeComponent } from './pages/home/home.component';
 import { AuthGuard } from './guards/auth.guard';
 import { PreCadastroComponent } from './pages/pre-cadastro/pre-cadastro.component';
+import { AcoesSociaisComponent } from './pages/acoes-sociais/acoes-sociais.component';
 
 const routes: Routes = [
   {
@@ -55,6 +56,10 @@ const routes: Routes = [
   {
     path: 'pre-cadastro',
     component: PreCadastroComponent
+  },
+  {
+    path: 'acoes-sociais',
+    component: AcoesSociaisComponent
   }
 
 

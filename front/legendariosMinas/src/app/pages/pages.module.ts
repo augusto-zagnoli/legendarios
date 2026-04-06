@@ -27,6 +27,7 @@ import { PagamentoCadastroSenderistaComponent } from './cadastro-senderistas/pag
 import { DescricaoEventoCadastroSenderistaComponent } from './cadastro-senderistas/descricao-evento-cadastro-senderista/descricao-evento-cadastro-senderista.component';
 import { StatusPagamentoComponent } from './cadastro-senderistas/pagamento-cadastro-senderista/status-pagamento/status-pagamento.component';
 import { PreCadastroComponent } from './pre-cadastro/pre-cadastro.component';
+import { AcoesSociaisComponent } from './acoes-sociais/acoes-sociais.component';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
@@ -43,7 +44,8 @@ import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform
         PagamentoCadastroSenderistaComponent,
         DescricaoEventoCadastroSenderistaComponent,
         StatusPagamentoComponent,
-        PreCadastroComponent
+        PreCadastroComponent,
+        AcoesSociaisComponent
     ],
     providers: [ MatStepper,CdkStepper,],
     imports: [

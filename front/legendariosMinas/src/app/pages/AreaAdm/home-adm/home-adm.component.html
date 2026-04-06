@@ -1,348 +1,402 @@
-﻿<div class="container-fluid dashboard-content">
+<div class="adm-wrapper">
 
-  <!-- Título -->
-  <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-    <h2 class="mb-0">Dashboard — Gerenciamento de Cadastros</h2>
-    <div class="d-flex gap-2">
-      <button class="btn btn-sm btn-primary" (click)="abrirModalUsuario()">
-        + Novo Usuário
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <nav class="adm-sidebar" [class.collapsed]="sidebarCollapsed">
+
+    <div class="sidebar-brand">
+      <img src="assets/imgTop/logoTop.png" height="36" alt="Logo">
+      <span class="sidebar-label ms-2 fw-bold text-warning">Legendários ADM</span>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li [class.active]="secaoAtiva === 'dashboard'" (click)="secaoAtiva = 'dashboard'">
+        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-label">Dashboard</span>
+      </li>
+      <li [class.active]="secaoAtiva === 'cadastros'" (click)="irParaCadastros()">
+        <span class="sidebar-icon">👥</span>
+        <span class="sidebar-label">Cadastros</span>
+        <span class="badge bg-warning text-dark sidebar-badge" *ngIf="pendentes > 0">{{ pendentes }}</span>
+      </li>
+      <li [class.active]="secaoAtiva === 'anuncios'" (click)="irParaAnuncios()">
+        <span class="sidebar-icon">📢</span>
+        <span class="sidebar-label">Ações Sociais</span>
+      </li>
+      <li [class.active]="secaoAtiva === 'usuarios'" (click)="secaoAtiva = 'usuarios'">
+        <span class="sidebar-icon">🔑</span>
+        <span class="sidebar-label">Usuários</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-sm btn-outline-danger w-100" (click)="logout()">
+        <span>🚪</span> <span class="sidebar-label ms-1">Sair</span>
       </button>
-      <a routerLink="/pre-cadastro" target="_blank" class="btn btn-sm btn-outline-primary">
-        Ver página de cadastro público
-      </a>
     </div>
-  </div>
+  </nav>
 
-  <!-- Cards de Estatísticas -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-      <div class="card text-center border-0 shadow-sm">
+  <!-- Toggle mobile -->
+  <button class="sidebar-toggle-btn" (click)="sidebarCollapsed = !sidebarCollapsed">
+    {{ sidebarCollapsed ? '☰' : '✕' }}
+  </button>
+
+  <!-- ══════════ CONTEÚDO PRINCIPAL ══════════ -->
+  <main class="adm-main" [class.expanded]="sidebarCollapsed">
+
+    <!-- ══ DASHBOARD ══ -->
+    <section *ngIf="secaoAtiva === 'dashboard'">
+      <h4 class="section-title">Dashboard</h4>
+
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <div class="fs-1 fw-bold text-primary">{{ totalCadastros }}</div>
+              <div class="text-muted small">Total de Cadastros</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <div class="fs-1 fw-bold text-warning">{{ pendentes }}</div>
+              <div class="text-muted small">Pendentes</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <div class="fs-1 fw-bold text-success">{{ aprovados }}</div>
+              <div class="text-muted small">Aprovados</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <div class="fs-1 fw-bold text-danger">{{ reprovados }}</div>
+              <div class="text-muted small">Reprovados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4" *ngIf="totalCadastros > 0">
         <div class="card-body">
-          <div class="fs-1 fw-bold text-primary">{{ totalCadastros }}</div>
-          <div class="text-muted small">Total de Cadastros</div>
+          <h6 class="card-title text-muted mb-3">Distribuição por Status</h6>
+          <po-chart [p-series]="graficoSeries" [p-type]="tipoGrafico" [p-height]="300" p-title=""></po-chart>
         </div>
       </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="card text-center border-0 shadow-sm">
+
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <div class="card border-0 shadow-sm h-100 text-center p-3 adm-shortcut" (click)="irParaCadastros()">
+            <div class="fs-2">👥</div>
+            <div class="fw-bold mt-1">Gerenciar Cadastros</div>
+            <div class="text-muted small">{{ pendentes }} pendente(s)</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card border-0 shadow-sm h-100 text-center p-3 adm-shortcut" (click)="irParaAnuncios()">
+            <div class="fs-2">📢</div>
+            <div class="fw-bold mt-1">Ações Sociais</div>
+            <div class="text-muted small">{{ listaAnuncios.length }} anúncio(s)</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <a routerLink="/pre-cadastro" target="_blank" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 text-center p-3 adm-shortcut">
+              <div class="fs-2">🔗</div>
+              <div class="fw-bold mt-1">Página de Cadastro</div>
+              <div class="text-muted small">Abrir link público</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ CADASTROS ══ -->
+    <section *ngIf="secaoAtiva === 'cadastros'">
+      <h4 class="section-title">Cadastros</h4>
+
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="abaAtiva === 'pendente'" (click)="carregarAba('pendente')">
+            Pendentes <span class="badge bg-warning text-dark ms-1">{{ pendentes }}</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="abaAtiva === 'aprovado'" (click)="carregarAba('aprovado')">
+            Aprovados <span class="badge bg-success ms-1">{{ aprovados }}</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="abaAtiva === 'reprovado'" (click)="carregarAba('reprovado')">
+            Reprovados <span class="badge bg-danger ms-1">{{ reprovados }}</span>
+          </button>
+        </li>
+      </ul>
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+          <span class="small text-muted">
+            {{ listaFiltrada.length }} registro(s)
+            <span *ngIf="totalFiltrosAtivos > 0" class="badge bg-primary ms-1">{{ totalFiltrosAtivos }} filtro(s)</span>
+          </span>
+          <div>
+            <button class="btn btn-sm btn-outline-secondary me-2" (click)="filtrosVisiveis = !filtrosVisiveis">
+              {{ filtrosVisiveis ? '▲ Ocultar' : '▼ Filtros' }}
+            </button>
+            <button class="btn btn-sm btn-outline-danger" *ngIf="totalFiltrosAtivos > 0" (click)="limparFiltros()">✕</button>
+          </div>
+        </div>
+
+        <div class="card-body border-bottom bg-light" *ngIf="filtrosVisiveis">
+          <div class="row g-2">
+            <div class="col-12"><small class="text-muted fw-bold text-uppercase">Dados Pessoais</small></div>
+            <div class="col-12 col-md-3"><input class="form-control form-control-sm" placeholder="Nome" [(ngModel)]="filtros.nome"></div>
+            <div class="col-12 col-md-3"><input class="form-control form-control-sm" placeholder="E-mail" [(ngModel)]="filtros.email"></div>
+            <div class="col-12 col-md-2"><input class="form-control form-control-sm" placeholder="Celular" [(ngModel)]="filtros.celular"></div>
+            <div class="col-12 col-md-2"><input class="form-control form-control-sm" placeholder="CPF / Doc." [(ngModel)]="filtros.cadastro_pessoa"></div>
+            <div class="col-12 col-md-2">
+              <select class="form-select form-select-sm" [(ngModel)]="filtros.estado_civil">
+                <option value="">Estado Civil</option>
+                <option>Solteiro</option><option>Solteira</option><option>Casado</option><option>Casada</option>
+                <option>Divorciado</option><option>Divorciada</option><option>Viúvo</option><option>Viúva</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select class="form-select form-select-sm" [(ngModel)]="filtros.tipo_sanguineo">
+                <option value="">Tipo Sanguíneo</option>
+                <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3"><input class="form-control form-control-sm" placeholder="Profissão" [(ngModel)]="filtros.profissao"></div>
+            <div class="col-12 col-md-2">
+              <select class="form-select form-select-sm" [(ngModel)]="filtros.tamanho_camiseta">
+                <option value="">Camiseta</option>
+                <option>PP</option><option>P</option><option>M</option><option>G</option><option>GG</option><option>XG</option>
+              </select>
+            </div>
+
+            <div class="col-12 mt-2"><small class="text-muted fw-bold text-uppercase">Igreja / Rede</small></div>
+            <div class="col-12 col-md-3"><input class="form-control form-control-sm" placeholder="Religião" [(ngModel)]="filtros.religiao"></div>
+            <div class="col-12 col-md-3"><input class="form-control form-control-sm" placeholder="Igreja" [(ngModel)]="filtros.igreja"></div>
+            <div class="col-12 col-md-2"><input class="form-control form-control-sm" placeholder="Rede (WAKE, DINAMOS...)" [(ngModel)]="filtros.rede"></div>
+            <div class="col-12 col-md-2">
+              <select class="form-select form-select-sm" [(ngModel)]="filtros.e_batizado">
+                <option value="">Batizado?</option><option value="true">Sim</option><option value="false">Não</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select class="form-select form-select-sm" [(ngModel)]="filtros.frequenta_celula">
+                <option value="">Frequenta Célula?</option><option value="true">Sim</option><option value="false">Não</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select class="form-select form-select-sm" [(ngModel)]="filtros.e_lider_de_celula">
+                <option value="">Líder de Célula?</option><option value="true">Sim</option><option value="false">Não</option>
+              </select>
+            </div>
+
+            <div class="col-12 mt-2"><small class="text-muted fw-bold text-uppercase">Habilitação</small></div>
+            <div class="col-12 col-md-3"><input class="form-control form-control-sm" placeholder="Nº CNH" [(ngModel)]="filtros.cnh"></div>
+            <div class="col-12 col-md-2">
+              <select class="form-select form-select-sm" [(ngModel)]="filtros.categoria_cnh">
+                <option value="">Categoria CNH</option>
+                <option>A</option><option>B</option><option>AB</option><option>C</option><option>D</option><option>E</option>
+              </select>
+            </div>
+
+            <div class="col-12 mt-2"><small class="text-muted fw-bold text-uppercase">Endereço</small></div>
+            <div class="col-12 col-md-3"><input class="form-control form-control-sm" placeholder="Cidade" [(ngModel)]="filtros.cidade"></div>
+            <div class="col-12 col-md-2">
+              <select class="form-select form-select-sm" [(ngModel)]="filtros.estado">
+                <option value="">UF</option>
+                <option *ngFor="let uf of ufs">{{ uf }}</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2"><input class="form-control form-control-sm" placeholder="CEP" [(ngModel)]="filtros.cep"></div>
+            <div class="col-12 col-md-2"><input class="form-control form-control-sm" placeholder="País" [(ngModel)]="filtros.pais"></div>
+
+            <div class="col-12 mt-2"><small class="text-muted fw-bold text-uppercase">Contato de Emergência</small></div>
+            <div class="col-12 col-md-3"><input class="form-control form-control-sm" placeholder="Nome de emergência" [(ngModel)]="filtros.emergencia_nome"></div>
+          </div>
+        </div>
+
+        <div class="card-body p-0">
+          <div *ngIf="carregandoTabela" class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm me-2"></div> Carregando...
+          </div>
+          <div *ngIf="!carregandoTabela && listaExibida.length === 0 && mensagemTabela" class="text-center py-5 text-muted">{{ mensagemTabela }}</div>
+          <div *ngIf="!carregandoTabela && listaExibida.length > 0 && listaFiltrada.length === 0" class="text-center py-5 text-muted">
+            Nenhum registro corresponde aos filtros.
+          </div>
+          <div class="table-responsive" *ngIf="!carregandoTabela && listaFiltrada.length > 0">
+            <table class="table table-hover mb-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Nome</th><th>E-mail</th><th>Celular</th><th>Profissão</th><th>Cidade / UF</th><th>Cadastro</th><th class="text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of listaFiltrada">
+                  <td>{{ item.nome }}</td>
+                  <td>{{ item.email }}</td>
+                  <td>{{ item.celular }}</td>
+                  <td>{{ item.profissao }}</td>
+                  <td>{{ item.cidade }}{{ item.estado ? ' / ' + item.estado : '' }}</td>
+                  <td>{{ item.data_cadastro | date:'dd/MM/yyyy' }}</td>
+                  <td class="text-center text-nowrap">
+                    <ng-container *ngIf="abaAtiva === 'pendente'">
+                      <button class="btn btn-sm btn-success me-1" (click)="aprovar(item.id_legendario)">✓ Aprovar</button>
+                      <button class="btn btn-sm btn-danger" (click)="reprovar(item.id_legendario)">✗ Reprovar</button>
+                    </ng-container>
+                    <ng-container *ngIf="abaAtiva === 'aprovado'">
+                      <button class="btn btn-sm btn-warning text-dark" (click)="reabrir(item.id_legendario)">↩ Reabrir</button>
+                    </ng-container>
+                    <ng-container *ngIf="abaAtiva === 'reprovado'">
+                      <button class="btn btn-sm btn-warning text-dark me-1" (click)="reabrir(item.id_legendario)">↩ Reabrir</button>
+                      <button class="btn btn-sm btn-success" (click)="aprovar(item.id_legendario)">✓ Aprovar</button>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ AÇÕES SOCIAIS ══ -->
+    <section *ngIf="secaoAtiva === 'anuncios'">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="section-title mb-0">Ações Sociais</h4>
+        <button class="btn btn-success btn-sm" (click)="novoAnuncio()">+ Novo Anúncio</button>
+      </div>
+
+      <div *ngIf="carregandoAnuncios" class="text-center py-4">
+        <div class="spinner-border text-warning"></div>
+      </div>
+
+      <div class="row g-3" *ngIf="!carregandoAnuncios">
+        <div class="col-12 col-md-6 col-lg-4" *ngFor="let a of listaAnuncios">
+          <div class="card h-100 shadow-sm border-0">
+            <img [src]="a.imagem_url" class="card-img-top" alt="{{ a.titulo }}"
+              style="height: 160px; object-fit: cover;"
+              onerror="this.src='assets/imgTop/logoTop.png'">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <h6 class="fw-bold">{{ a.titulo }}</h6>
+                <span class="badge" [class.bg-success]="a.ativo" [class.bg-secondary]="!a.ativo">
+                  {{ a.ativo ? 'Ativo' : 'Inativo' }}
+                </span>
+              </div>
+              <p class="small text-muted">{{ a.texto }}</p>
+            </div>
+            <div class="card-footer bg-white border-0 d-flex gap-2">
+              <button class="btn btn-sm btn-outline-primary w-50" (click)="editarAnuncio(a)">Editar</button>
+              <button class="btn btn-sm btn-outline-danger w-50" (click)="confirmarDeletarAnuncio(a.id_anuncio)">Excluir</button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="listaAnuncios.length === 0" class="col-12 text-center text-muted py-4">
+          Nenhum anúncio cadastrado ainda.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ USUÁRIOS ══ -->
+    <section *ngIf="secaoAtiva === 'usuarios'">
+      <h4 class="section-title">Usuários Administradores</h4>
+
+      <div class="card shadow-sm" style="max-width: 480px;">
+        <div class="card-header bg-white fw-bold">Criar novo usuário</div>
         <div class="card-body">
-          <div class="fs-1 fw-bold text-warning">{{ pendentes }}</div>
-          <div class="text-muted small">Pendentes</div>
+          <div class="alert alert-danger py-2" *ngIf="erroUsuario">{{ erroUsuario }}</div>
+          <div class="alert alert-success py-2" *ngIf="sucessoUsuario">{{ sucessoUsuario }}</div>
+          <div class="mb-3">
+            <label class="form-label">Login <span class="text-danger">*</span></label>
+            <input class="form-control" [(ngModel)]="novoUsuario.login" placeholder="Ex: joao.silva" autocomplete="username">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Senha <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" [(ngModel)]="novoUsuario.senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirmar Senha <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" [(ngModel)]="novoUsuario.confirmaSenha" placeholder="Repita a senha" autocomplete="new-password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nível de Permissão</label>
+            <select class="form-select" [(ngModel)]="novoUsuario.nivel_permissao">
+              <option [ngValue]="1">1 — Administrador</option>
+              <option [ngValue]="0">0 — Visualizador</option>
+            </select>
+          </div>
+          <button class="btn btn-primary w-100" (click)="salvarNovoUsuario()" [disabled]="salvandoUsuario">
+            <span *ngIf="salvandoUsuario" class="spinner-border spinner-border-sm me-1"></span>
+            {{ salvandoUsuario ? 'Salvando...' : 'Criar Usuário' }}
+          </button>
         </div>
       </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="card text-center border-0 shadow-sm">
-        <div class="card-body">
-          <div class="fs-1 fw-bold text-success">{{ aprovados }}</div>
-          <div class="text-muted small">Aprovados</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="card text-center border-0 shadow-sm">
-        <div class="card-body">
-          <div class="fs-1 fw-bold text-danger">{{ reprovados }}</div>
-          <div class="text-muted small">Reprovados</div>
-        </div>
-      </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Gráfico de distribuição por status -->
-  <div class="card border-0 shadow-sm mb-4" *ngIf="totalCadastros > 0">
-    <div class="card-body">
-      <h6 class="card-title text-muted mb-3">Distribuição por Status</h6>
-      <po-chart
-        [p-series]="graficoSeries"
-        [p-type]="tipoGrafico"
-        [p-height]="300"
-        p-title="">
-      </po-chart>
-    </div>
-  </div>
-
-  <!-- Abas de Navegação -->
-  <ul class="nav nav-tabs mb-3">
-    <li class="nav-item">
-      <button class="nav-link" [class.active]="abaAtiva === 'pendente'" (click)="carregarAba('pendente')">
-        Pendentes <span class="badge bg-warning text-dark ms-1">{{ pendentes }}</span>
-      </button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link" [class.active]="abaAtiva === 'aprovado'" (click)="carregarAba('aprovado')">
-        Aprovados <span class="badge bg-success ms-1">{{ aprovados }}</span>
-      </button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link" [class.active]="abaAtiva === 'reprovado'" (click)="carregarAba('reprovado')">
-        Reprovados <span class="badge bg-danger ms-1">{{ reprovados }}</span>
-      </button>
-    </li>
-  </ul>
-
-  <!-- Tabela -->
-  <div class="card shadow-sm">
-
-    <!-- Cabeçalho com botão de filtros -->
-    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-      <span class="small text-muted">
-        {{ listaFiltrada.length }} registro(s) exibido(s)
-        <span *ngIf="totalFiltrosAtivos > 0" class="badge bg-primary ms-1">{{ totalFiltrosAtivos }} filtro(s) ativo(s)</span>
-      </span>
-      <div>
-        <button class="btn btn-sm btn-outline-secondary me-2" (click)="filtrosVisiveis = !filtrosVisiveis">
-          {{ filtrosVisiveis ? '▲ Ocultar filtros' : '▼ Filtros' }}
-        </button>
-        <button class="btn btn-sm btn-outline-danger" *ngIf="totalFiltrosAtivos > 0" (click)="limparFiltros()">
-          ✕ Limpar
-        </button>
-      </div>
-    </div>
-
-    <!-- Painel de Filtros -->
-    <div class="card-body border-bottom bg-light" *ngIf="filtrosVisiveis">
-      <div class="row g-2">
-
-        <!-- Dados Pessoais -->
-        <div class="col-12"><small class="text-muted fw-bold text-uppercase">Dados Pessoais</small></div>
-        <div class="col-12 col-md-3">
-          <input class="form-control form-control-sm" placeholder="Nome" [(ngModel)]="filtros.nome">
-        </div>
-        <div class="col-12 col-md-3">
-          <input class="form-control form-control-sm" placeholder="E-mail" [(ngModel)]="filtros.email">
-        </div>
-        <div class="col-12 col-md-2">
-          <input class="form-control form-control-sm" placeholder="Celular" [(ngModel)]="filtros.celular">
-        </div>
-        <div class="col-12 col-md-2">
-          <input class="form-control form-control-sm" placeholder="CPF / Doc." [(ngModel)]="filtros.cadastro_pessoa">
-        </div>
-        <div class="col-12 col-md-2">
-          <select class="form-select form-select-sm" [(ngModel)]="filtros.estado_civil">
-            <option value="">Estado Civil</option>
-            <option>Solteiro</option><option>Solteira</option>
-            <option>Casado</option><option>Casada</option>
-            <option>Divorciado</option><option>Divorciada</option>
-            <option>Viúvo</option><option>Viúva</option>
-          </select>
-        </div>
-        <div class="col-12 col-md-2">
-          <select class="form-select form-select-sm" [(ngModel)]="filtros.tipo_sanguineo">
-            <option value="">Tipo Sanguíneo</option>
-            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-            <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
-          </select>
-        </div>
-        <div class="col-12 col-md-3">
-          <input class="form-control form-control-sm" placeholder="Profissão" [(ngModel)]="filtros.profissao">
-        </div>
-        <div class="col-12 col-md-2">
-          <select class="form-select form-select-sm" [(ngModel)]="filtros.tamanho_camiseta">
-            <option value="">Camiseta</option>
-            <option>PP</option><option>P</option><option>M</option>
-            <option>G</option><option>GG</option><option>XG</option>
-          </select>
-        </div>
-
-        <!-- Igreja / Rede -->
-        <div class="col-12 mt-2"><small class="text-muted fw-bold text-uppercase">Igreja / Rede</small></div>
-        <div class="col-12 col-md-3">
-          <input class="form-control form-control-sm" placeholder="Religião" [(ngModel)]="filtros.religiao">
-        </div>
-        <div class="col-12 col-md-3">
-          <input class="form-control form-control-sm" placeholder="Igreja" [(ngModel)]="filtros.igreja">
-        </div>
-        <div class="col-12 col-md-2">
-          <input class="form-control form-control-sm" placeholder="Rede (WAKE, DINAMOS...)" [(ngModel)]="filtros.rede">
-        </div>
-        <div class="col-12 col-md-2">
-          <select class="form-select form-select-sm" [(ngModel)]="filtros.e_batizado">
-            <option value="">Batizado?</option>
-            <option value="true">Sim</option>
-            <option value="false">Não</option>
-          </select>
-        </div>
-        <div class="col-12 col-md-2">
-          <select class="form-select form-select-sm" [(ngModel)]="filtros.frequenta_celula">
-            <option value="">Frequenta Célula?</option>
-            <option value="true">Sim</option>
-            <option value="false">Não</option>
-          </select>
-        </div>
-        <div class="col-12 col-md-2">
-          <select class="form-select form-select-sm" [(ngModel)]="filtros.e_lider_de_celula">
-            <option value="">Líder de Célula?</option>
-            <option value="true">Sim</option>
-            <option value="false">Não</option>
-          </select>
-        </div>
-
-        <!-- Habilitação -->
-        <div class="col-12 mt-2"><small class="text-muted fw-bold text-uppercase">Habilitação</small></div>
-        <div class="col-12 col-md-3">
-          <input class="form-control form-control-sm" placeholder="Nº CNH" [(ngModel)]="filtros.cnh">
-        </div>
-        <div class="col-12 col-md-2">
-          <select class="form-select form-select-sm" [(ngModel)]="filtros.categoria_cnh">
-            <option value="">Categoria CNH</option>
-            <option>A</option><option>B</option><option>AB</option>
-            <option>C</option><option>D</option><option>E</option>
-          </select>
-        </div>
-
-        <!-- Endereço -->
-        <div class="col-12 mt-2"><small class="text-muted fw-bold text-uppercase">Endereço</small></div>
-        <div class="col-12 col-md-3">
-          <input class="form-control form-control-sm" placeholder="Cidade" [(ngModel)]="filtros.cidade">
-        </div>
-        <div class="col-12 col-md-2">
-          <select class="form-select form-select-sm" [(ngModel)]="filtros.estado">
-            <option value="">UF</option>
-            <option *ngFor="let uf of ufs">{{ uf }}</option>
-          </select>
-        </div>
-        <div class="col-12 col-md-2">
-          <input class="form-control form-control-sm" placeholder="CEP" [(ngModel)]="filtros.cep">
-        </div>
-        <div class="col-12 col-md-2">
-          <input class="form-control form-control-sm" placeholder="País" [(ngModel)]="filtros.pais">
-        </div>
-
-        <!-- Emergência -->
-        <div class="col-12 mt-2"><small class="text-muted fw-bold text-uppercase">Contato de Emergência</small></div>
-        <div class="col-12 col-md-3">
-          <input class="form-control form-control-sm" placeholder="Nome de emergência" [(ngModel)]="filtros.emergencia_nome">
-        </div>
-
-      </div>
-    </div>
-
-    <div class="card-body p-0">
-
-      <div *ngIf="carregandoTabela" class="text-center py-5 text-muted">
-        <div class="spinner-border spinner-border-sm me-2"></div> Carregando...
-      </div>
-
-      <div *ngIf="!carregandoTabela && listaExibida.length === 0 && mensagemTabela" class="text-center py-5 text-muted">
-        {{ mensagemTabela }}
-      </div>
-
-      <div *ngIf="!carregandoTabela && listaExibida.length > 0 && listaFiltrada.length === 0" class="text-center py-5 text-muted">
-        Nenhum registro corresponde aos filtros aplicados.
-      </div>
-
-      <div class="table-responsive" *ngIf="!carregandoTabela && listaFiltrada.length > 0">
-        <table class="table table-hover mb-0 align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Nome</th>
-              <th>E-mail</th>
-              <th>Celular</th>
-              <th>Profissão</th>
-              <th>Cidade / UF</th>
-              <th>Data Cadastro</th>
-              <th class="text-center">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of listaFiltrada">
-              <td>{{ item.nome }}</td>
-              <td>{{ item.email }}</td>
-              <td>{{ item.celular }}</td>
-              <td>{{ item.profissao }}</td>
-              <td>{{ item.cidade }}{{ item.estado ? ' / ' + item.estado : '' }}</td>
-              <td>{{ item.data_cadastro | date:'dd/MM/yyyy' }}</td>
-              <td class="text-center text-nowrap">
-                <!-- Ações para registros PENDENTES -->
-                <ng-container *ngIf="abaAtiva === 'pendente'">
-                  <button class="btn btn-sm btn-success me-1" (click)="aprovar(item.id_legendario)" title="Aprovar">
-                    ✓ Aprovar
-                  </button>
-                  <button class="btn btn-sm btn-danger" (click)="reprovar(item.id_legendario)" title="Reprovar">
-                    ✗ Reprovar
-                  </button>
-                </ng-container>
-                <!-- Ações para registros APROVADOS -->
-                <ng-container *ngIf="abaAtiva === 'aprovado'">
-                  <button class="btn btn-sm btn-warning text-dark" (click)="reabrir(item.id_legendario)" title="Mover para pendente">
-                    ↩ Reabrir
-                  </button>
-                </ng-container>
-                <!-- Ações para registros REPROVADOS -->
-                <ng-container *ngIf="abaAtiva === 'reprovado'">
-                  <button class="btn btn-sm btn-warning text-dark me-1" (click)="reabrir(item.id_legendario)" title="Mover para pendente">
-                    ↩ Reabrir
-                  </button>
-                  <button class="btn btn-sm btn-success" (click)="aprovar(item.id_legendario)" title="Aprovar direto">
-                    ✓ Aprovar
-                  </button>
-                </ng-container>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-  </div>
-
+  </main>
 </div>
 
-<!-- ══════════════════ Modal Novo Usuário ══════════════════ -->
-<div class="modal-backdrop fade show" *ngIf="modalUsuarioVisivel" style="z-index:1040;"></div>
-<div class="modal d-block" tabindex="-1" *ngIf="modalUsuarioVisivel" style="z-index:1050;">
-  <div class="modal-dialog modal-dialog-centered">
+<!-- ══ Modal Anúncio ══ -->
+<div class="modal-backdrop fade show" *ngIf="modalAnuncioVisivel" style="z-index:1040;"></div>
+<div class="modal d-block" tabindex="-1" *ngIf="modalAnuncioVisivel" style="z-index:1050;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-
       <div class="modal-header">
-        <h5 class="modal-title">Novo Usuário Administrador</h5>
-        <button type="button" class="btn-close" (click)="fecharModalUsuario()"></button>
+        <h5 class="modal-title">{{ anuncioForm.id_anuncio ? 'Editar' : 'Novo' }} Anúncio</h5>
+        <button type="button" class="btn-close" (click)="fecharModalAnuncio()"></button>
       </div>
-
       <div class="modal-body">
-
-        <div class="alert alert-danger py-2" *ngIf="erroUsuario">{{ erroUsuario }}</div>
-        <div class="alert alert-success py-2" *ngIf="sucessoUsuario">{{ sucessoUsuario }}</div>
-
+        <div class="alert alert-danger py-2" *ngIf="erroAnuncio">{{ erroAnuncio }}</div>
         <div class="mb-3">
-          <label class="form-label">Login <span class="text-danger">*</span></label>
-          <input class="form-control" [(ngModel)]="novoUsuario.login"
-                 placeholder="Ex: joao.silva" autocomplete="username">
+          <label class="form-label">Título <span class="text-danger">*</span></label>
+          <input class="form-control" [(ngModel)]="anuncioForm.titulo" placeholder="Título do anúncio">
         </div>
-
         <div class="mb-3">
-          <label class="form-label">Senha <span class="text-danger">*</span></label>
-          <input type="password" class="form-control" [(ngModel)]="novoUsuario.senha"
-                 placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <label class="form-label">URL da Imagem <span class="text-danger">*</span></label>
+          <input class="form-control" [(ngModel)]="anuncioForm.imagem_url" placeholder="https://...">
+          <img *ngIf="anuncioForm.imagem_url" [src]="anuncioForm.imagem_url" class="mt-2 rounded"
+            style="max-height:120px; object-fit:cover;" onerror="this.style.display='none'">
         </div>
-
         <div class="mb-3">
-          <label class="form-label">Confirmar Senha <span class="text-danger">*</span></label>
-          <input type="password" class="form-control" [(ngModel)]="novoUsuario.confirmaSenha"
-                 placeholder="Repita a senha" autocomplete="new-password">
+          <label class="form-label">Texto <span class="text-danger">*</span></label>
+          <textarea class="form-control" rows="4" [(ngModel)]="anuncioForm.texto" placeholder="Descrição da ação..."></textarea>
         </div>
-
         <div class="mb-3">
-          <label class="form-label">Nível de Permissão</label>
-          <select class="form-select" [(ngModel)]="novoUsuario.nivel_permissao">
-            <option [ngValue]="1">1 — Administrador</option>
-            <option [ngValue]="0">0 — Visualizador</option>
-          </select>
+          <label class="form-label">Link (opcional)</label>
+          <input class="form-control" [(ngModel)]="anuncioForm.link" placeholder="https://wa.me/...">
         </div>
-
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Ordem de exibição</label>
+            <input type="number" class="form-control" [(ngModel)]="anuncioForm.ordem">
+          </div>
+          <div class="col-6 d-flex align-items-end">
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" [(ngModel)]="anuncioForm.ativo" id="switchAtivo">
+              <label class="form-check-label" for="switchAtivo">Ativo</label>
+            </div>
+          </div>
+        </div>
       </div>
-
       <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="fecharModalUsuario()" [disabled]="salvandoUsuario">
-          Cancelar
-        </button>
-        <button class="btn btn-primary" (click)="salvarNovoUsuario()" [disabled]="salvandoUsuario">
-          <span *ngIf="salvandoUsuario" class="spinner-border spinner-border-sm me-1"></span>
-          {{ salvandoUsuario ? 'Salvando...' : 'Criar Usuário' }}
+        <button class="btn btn-secondary" (click)="fecharModalAnuncio()" [disabled]="salvandoAnuncio">Cancelar</button>
+        <button class="btn btn-primary" (click)="salvarAnuncio()" [disabled]="salvandoAnuncio">
+          <span *ngIf="salvandoAnuncio" class="spinner-border spinner-border-sm me-1"></span>
+          {{ salvandoAnuncio ? 'Salvando...' : 'Salvar' }}
         </button>
       </div>
-
     </div>
   </div>
 </div>
+
