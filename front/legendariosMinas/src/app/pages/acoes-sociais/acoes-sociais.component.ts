@@ -7,6 +7,7 @@ import { LegendariosPublicoService } from 'src/app/services/legendarios-publico.
   styleUrls: ['./acoes-sociais.component.css']
 })
 export class AcoesSociaisComponent implements OnInit {
+  abaAtiva: 'acoes' | 'voluntarios' = 'acoes';
   anuncios: any[] = [];
   carregando = true;
   erro = '';
