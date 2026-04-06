@@ -26,6 +26,7 @@ import { CdkStepper } from "@angular/cdk/stepper";
 import { PagamentoCadastroSenderistaComponent } from './cadastro-senderistas/pagamento-cadastro-senderista/pagamento-cadastro-senderista.component';
 import { DescricaoEventoCadastroSenderistaComponent } from './cadastro-senderistas/descricao-evento-cadastro-senderista/descricao-evento-cadastro-senderista.component';
 import { StatusPagamentoComponent } from './cadastro-senderistas/pagamento-cadastro-senderista/status-pagamento/status-pagamento.component';
+import { PreCadastroComponent } from './pre-cadastro/pre-cadastro.component';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
@@ -41,11 +42,13 @@ import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform
         ThirthSteepComponent,
         PagamentoCadastroSenderistaComponent,
         DescricaoEventoCadastroSenderistaComponent,
-        StatusPagamentoComponent
+        StatusPagamentoComponent,
+        PreCadastroComponent
     ],
     providers: [ MatStepper,CdkStepper,],
     imports: [
         BrowserModule,
+        CommonModule,
         AppRoutingModule,
         PoModule,
         RouterModule.forRoot([]),

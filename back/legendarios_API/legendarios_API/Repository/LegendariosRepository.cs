@@ -106,23 +106,117 @@ namespace legendarios_API.Repository
             }
         }
 
+        public ResponseOneDTO CadastrarLegendario(LegendariosDTO legendario)
+        {
+            try
+            {
+                var sql = @"INSERT INTO legendarios
+                    (nome, email, celular, cadastro_pessoa, data_de_nascimento, estado_civil,
+                     profissao, tipo_sanguineo, religiao, cnh, categoria_cnh,
+                     endereco, cidade, estado, cep, pais,
+                     emergencia_nome, emergencia_telefone, tamanho_camiseta, observacoes,
+                     data_cadastro, status_cadastro, ativo, deletado)
+                    VALUES
+                    (@nome, @email, @celular, @cadastro_pessoa, @data_de_nascimento, @estado_civil,
+                     @profissao, @tipo_sanguineo, @religiao, @cnh, @categoria_cnh,
+                     @endereco, @cidade, @estado, @cep, @pais,
+                     @emergencia_nome, @emergencia_telefone, @tamanho_camiseta, @observacoes,
+                     @data_cadastro, 'pendente', 1, 0)";
+
+                this._conn.Execute(sql, new
+                {
+                    legendario.nome,
+                    legendario.email,
+                    legendario.celular,
+                    legendario.cadastro_pessoa,
+                    legendario.data_de_nascimento,
+                    legendario.estado_civil,
+                    legendario.profissao,
+                    legendario.tipo_sanguineo,
+                    legendario.religiao,
+                    legendario.cnh,
+                    legendario.categoria_cnh,
+                    legendario.endereco,
+                    legendario.cidade,
+                    legendario.estado,
+                    legendario.cep,
+                    legendario.pais,
+                    legendario.emergencia_nome,
+                    legendario.emergencia_telefone,
+                    legendario.tamanho_camiseta,
+                    legendario.observacoes,
+                    data_cadastro = DateTime.Now
+                });
+
+                return new ResponseOneDTO { Sucesso = true, Erro = "" };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseOneDTO { Sucesso = false, Erro = ex.Message };
+            }
+        }
+
+        public ResponseListDTO GetEstatisticasDashboard()
+        {
+            try
+            {
+                var sqlTotal = "SELECT COUNT(*) FROM legendarios WHERE deletado = 0";
+                var sqlPendentes = "SELECT COUNT(*) FROM legendarios WHERE deletado = 0 AND status_cadastro = 'pendente'";
+                var sqlAprovados = "SELECT COUNT(*) FROM legendarios WHERE deletado = 0 AND status_cadastro = 'aprovado'";
+                var sqlReprovados = "SELECT COUNT(*) FROM legendarios WHERE deletado = 0 AND status_cadastro = 'reprovado'";
+
+                var total = this._conn.ExecuteScalar<int>(sqlTotal);
+                var pendentes = this._conn.ExecuteScalar<int>(sqlPendentes);
+                var aprovados = this._conn.ExecuteScalar<int>(sqlAprovados);
+                var reprovados = this._conn.ExecuteScalar<int>(sqlReprovados);
+
+                return new ResponseListDTO
+                {
+                    Sucesso = true,
+                    Erro = $"{total}|{pendentes}|{aprovados}|{reprovados}"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseListDTO { Sucesso = false, Erro = ex.Message };
+            }
+        }
+
+        public ResponseOneDTO AtualizarStatusLegendario(int idLegendario, string status)
+        {
+            try
+            {
+                var sql = "UPDATE legendarios SET status_cadastro = @status WHERE id_legendario = @id";
+                this._conn.Execute(sql, new { status, id = idLegendario });
+                return new ResponseOneDTO { Sucesso = true, Erro = "" };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseOneDTO { Sucesso = false, Erro = ex.Message };
+            }
+        }
+
+        public ResponseListDTO GetLegendariosPorStatus(string status)
+        {
+            try
+            {
+                var sql = "SELECT * FROM legendarios WHERE deletado = 0 AND status_cadastro = @status ORDER BY data_cadastro DESC";
+                var result = this._conn.Query<LegendariosDTO>(sql, new { status }).ToList();
+                return new ResponseListDTO { Sucesso = true, Data = result, Erro = "" };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseListDTO { Sucesso = false, Erro = ex.Message };
+            }
+        }
+
         public ResponseOneDTO GetLegendarioById(string IdLegendario)
         {
             try
             {
-                var sql = $"SELECT * FROM legendarios where n_lgnd = {IdLegendario}";
-
-                var result = this._conn.QueryFirstAsync<LegendariosDTO>(sql).Result;
-
-
-                var response = new ResponseOneDTO
-                {
-                    Sucesso = true,
-                    Data = result,
-                    Erro = ""
-                };
-
-                return response;
+                var sql = "SELECT * FROM legendarios WHERE n_lgnd = @idLegendario";
+                var result = this._conn.QueryFirst<LegendariosDTO>(sql, new { idLegendario = IdLegendario });
+                return new ResponseOneDTO { Sucesso = true, Data = result, Erro = "" };
             }
             catch (Exception ex)
             {
@@ -134,41 +228,37 @@ namespace legendarios_API.Repository
         {
             try
             {
-                var sql = @$"UPDATE legendarios
-                                                SET 
-                                                id_legendario = {legendario.id_legendario}, 
-                                                n_lgnd = {legendario.n_lgnd},
-                                                nome = {legendario.nome},
-                                                rec = {legendario.rec},
-                                                celular = {legendario.celular},
-                                                cadastro_pessoa = {legendario.cadastro_pessoa},
-                                                data_de_nascimento = {legendario.data_de_nascimento},
-                                                estado_civil = {legendario.estado_civil},
-                                                profissao = {legendario.profissao},
-                                                tipo_sanguineo = {legendario.tipo_sanguineo},
-                                                religiao = {legendario.religiao},
-                                                igreja = {legendario.igreja},
-                                                e_batizado = {legendario.e_batizado},
-                                                frequanta_celula = {legendario.frequanta_celula},
-                                                rede = {legendario.rede},
-                                                e_lider_de_celula = {legendario.e_lider_de_celula},
-                                                ativo = {legendario.ativo},
-                                                deletado = {legendario.deletado},
-                                                
-                                                WHERE id_legendario = {legendario.id_legendario} ;";
+                var sql = @"UPDATE legendarios SET
+                                nome = @nome,
+                                celular = @celular,
+                                cadastro_pessoa = @cadastro_pessoa,
+                                data_de_nascimento = @data_de_nascimento,
+                                estado_civil = @estado_civil,
+                                profissao = @profissao,
+                                tipo_sanguineo = @tipo_sanguineo,
+                                religiao = @religiao,
+                                igreja = @igreja,
+                                e_batizado = @e_batizado,
+                                frequenta_celula = @frequenta_celula,
+                                rede = @rede,
+                                e_lider_de_celula = @e_lider_de_celula,
+                                ativo = @ativo,
+                                cnh = @cnh,
+                                categoria_cnh = @categoria_cnh,
+                                endereco = @endereco,
+                                cidade = @cidade,
+                                estado = @estado,
+                                cep = @cep,
+                                pais = @pais,
+                                emergencia_nome = @emergencia_nome,
+                                emergencia_telefone = @emergencia_telefone,
+                                tamanho_camiseta = @tamanho_camiseta,
+                                observacoes = @observacoes,
+                                status_cadastro = @status_cadastro
+                            WHERE id_legendario = @id_legendario";
 
-                var result = this._conn.ExecuteAsync(sql).Result;
-
-
-
-
-                var response = new ResponseOneDTO()
-                {
-                    Sucesso = true,
-                    Erro = ""
-                };
-
-                return response;
+                this._conn.Execute(sql, legendario);
+                return new ResponseOneDTO { Sucesso = true, Erro = "" };
             }
             catch (Exception ex)
             {

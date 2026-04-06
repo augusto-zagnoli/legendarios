@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using legendarios_API.DTO;
 using legendarios_API.Entity;
 using legendarios_API.Models;
 using legendarios_API.Repository;
@@ -94,6 +95,41 @@ namespace legendarios_API.Controllers
             };
 
             return Ok(response);
+        }
+
+        // ---- endpoints públicos ----
+
+        [HttpPost("cadastro-publico")]
+        public ActionResult<ResponseOneDTO> PostCadastroPublico([FromBody] LegendariosDTO legendario)
+        {
+            var result = _LegendariosService.CadastrarLegendario(legendario);
+            return Ok(result);
+        }
+
+        // ---- endpoints ADM ----
+
+        [HttpGet("dashboard/estatisticas")]
+        [Authorize]
+        public ActionResult<ResponseListDTO> GetEstatisticasDashboard()
+        {
+            var result = _LegendariosService.GetEstatisticasDashboard();
+            return Ok(result);
+        }
+
+        [HttpGet("dashboard/por-status/{status}")]
+        [Authorize]
+        public ActionResult<ResponseListDTO> GetLegendariosPorStatus(string status)
+        {
+            var result = _LegendariosService.GetLegendariosPorStatus(status);
+            return Ok(result);
+        }
+
+        [HttpPatch("dashboard/status/{idLegendario}")]
+        [Authorize]
+        public ActionResult<ResponseOneDTO> PatchStatus(int idLegendario, [FromBody] AtualizarStatusDTO dto)
+        {
+            var result = _LegendariosService.AtualizarStatusLegendario(idLegendario, dto.Status);
+            return Ok(result);
         }
 
     }

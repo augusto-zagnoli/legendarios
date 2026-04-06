@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { legendarios } from './Model/legendariosModel';
-import { HomeAdmService } from './service/home-adm.service';
+import { PoChartType } from '@po-ui/ng-components';
 import { AuthService } from 'src/app/services/auth.service';
+import { LegendariosPublicoService } from 'src/app/services/legendarios-publico.service';
 
 @Component({
   selector: 'app-home-adm',
@@ -11,35 +10,168 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./home-adm.component.scss']
 })
 export class HomeAdmComponent implements OnInit {
-  pagina: number = 10;
-  paginaatual: number | undefined;
-  ultimapagina: number | undefined;
-  totaldeorcamentospararetornar: number | undefined = 10;
-  listaDadosLegendarios: legendarios[] = [];
 
+  // Estatísticas
+  totalCadastros = 0;
+  pendentes = 0;
+  aprovados = 0;
+  reprovados = 0;
 
-
-  categories: string[] = ['teste3', 'teste2'];
-
-  series = [
-    { label: 'Legendários', data: 100 },
-    { label: 'Senderistas', data: 10 },
+  // Gráfico
+  readonly tipoGrafico = PoChartType.Donut;
+  graficoCategorias: string[] = ['Pendentes', 'Aprovados', 'Reprovados'];
+  graficoSeries: { label: string; data: number; color?: string }[] = [
+    { label: 'Pendentes',  data: 0, color: '#f0ad4e' },
+    { label: 'Aprovados',  data: 0, color: '#5cb85c' },
+    { label: 'Reprovados', data: 0, color: '#d9534f' },
   ];
 
+  // Tabela
+  abaAtiva: 'pendente' | 'aprovado' | 'reprovado' = 'pendente';
+  listaExibida: any[] = [];
+  carregandoTabela = false;
+  mensagemTabela = '';
 
-  constructor(private serviceHomeAdm: HomeAdmService,
-    private router: Router,
-    private authService: AuthService) { }
+  // Filtros
+  filtrosVisiveis = false;
+  filtros = {
+    nome: '', email: '', celular: '', cadastro_pessoa: '',
+    profissao: '', tipo_sanguineo: '', estado_civil: '',
+    cidade: '', estado: '', cep: '', pais: '',
+    cnh: '', categoria_cnh: '',
+    religiao: '', igreja: '', rede: '',
+    tamanho_camiseta: '', emergencia_nome: '',
+    e_batizado: '', frequenta_celula: '', e_lider_de_celula: ''
+  };
 
-  ngOnInit(): void {
-    // A rota já é protegida pelo AuthGuard;
-    // esta verificação adicional garante consistência
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login-adm']);
-    }
+  readonly ufs = [
+    'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA',
+    'MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
+    'RS','RO','RR','SC','SP','SE','TO'
+  ];
+
+  get listaFiltrada(): any[] {
+    return this.listaExibida.filter(item =>
+      this.txt(item.nome,             this.filtros.nome) &&
+      this.txt(item.email,            this.filtros.email) &&
+      this.txt(item.celular,          this.filtros.celular) &&
+      this.txt(item.cadastro_pessoa,  this.filtros.cadastro_pessoa) &&
+      this.txt(item.profissao,        this.filtros.profissao) &&
+      this.txt(item.tipo_sanguineo,   this.filtros.tipo_sanguineo) &&
+      this.txt(item.estado_civil,     this.filtros.estado_civil) &&
+      this.txt(item.cidade,           this.filtros.cidade) &&
+      this.txt(item.estado,           this.filtros.estado) &&
+      this.txt(item.cep,              this.filtros.cep) &&
+      this.txt(item.pais,             this.filtros.pais) &&
+      this.txt(item.cnh,              this.filtros.cnh) &&
+      this.txt(item.categoria_cnh,    this.filtros.categoria_cnh) &&
+      this.txt(item.religiao,         this.filtros.religiao) &&
+      this.txt(item.igreja,           this.filtros.igreja) &&
+      this.txt(item.rede,             this.filtros.rede) &&
+      this.txt(item.tamanho_camiseta, this.filtros.tamanho_camiseta) &&
+      this.txt(item.emergencia_nome,  this.filtros.emergencia_nome) &&
+      this.bool(item.e_batizado,        this.filtros.e_batizado) &&
+      this.bool(item.frequenta_celula,  this.filtros.frequenta_celula) &&
+      this.bool(item.e_lider_de_celula, this.filtros.e_lider_de_celula)
+    );
   }
 
-  onClickGridItenDadosTecnicos(event: any, element: any, testo: string) {
+  get totalFiltrosAtivos(): number {
+    return Object.values(this.filtros).filter(v => v !== '').length;
+  }
 
+  limparFiltros(): void {
+    Object.keys(this.filtros).forEach(k => (this.filtros as any)[k] = '');
+  }
+
+  private txt(valor: any, filtro: string): boolean {
+    if (!filtro) return true;
+    return String(valor ?? '').toLowerCase().includes(filtro.toLowerCase());
+  }
+
+  private bool(valor: any, filtro: string): boolean {
+    if (!filtro) return true;
+    return String(valor) === filtro;
+  }
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private service: LegendariosPublicoService
+  ) {}
+
+  ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login-adm']);
+      return;
+    }
+    this.carregarEstatisticas();
+    this.carregarAba('pendente');
+  }
+
+  carregarEstatisticas(): void {
+    this.service.getEstatisticas().subscribe({
+      next: (res) => {
+        if (res.sucesso) {
+          const partes = res.erro.split('|').map(Number);
+          this.totalCadastros = partes[0];
+          this.pendentes    = partes[1];
+          this.aprovados    = partes[2];
+          this.reprovados   = partes[3];
+          // atualiza gráfico
+          this.graficoSeries = [
+            { label: 'Pendentes',  data: this.pendentes,  color: '#f0ad4e' },
+            { label: 'Aprovados',  data: this.aprovados,  color: '#5cb85c' },
+            { label: 'Reprovados', data: this.reprovados, color: '#d9534f' },
+          ];
+        }
+      }
+    });
+  }
+
+  carregarAba(status: 'pendente' | 'aprovado' | 'reprovado'): void {
+    this.abaAtiva = status;
+    this.limparFiltros();
+    this.carregandoTabela = true;
+    this.listaExibida = [];
+    this.mensagemTabela = '';
+
+    this.service.getPorStatus(status).subscribe({
+      next: (res) => {
+        this.carregandoTabela = false;
+        if (res.sucesso) {
+          this.listaExibida = res.data || [];
+          if (this.listaExibida.length === 0) {
+            this.mensagemTabela = 'Nenhum registro encontrado.';
+          }
+        }
+      },
+      error: () => {
+        this.carregandoTabela = false;
+        this.mensagemTabela = 'Erro ao carregar dados.';
+      }
+    });
+  }
+
+  aprovar(id: number): void {
+    this.service.atualizarStatus(id, 'aprovado').subscribe({
+      next: () => { this.carregarEstatisticas(); this.carregarAba(this.abaAtiva); }
+    });
+  }
+
+  reprovar(id: number): void {
+    this.service.atualizarStatus(id, 'reprovado').subscribe({
+      next: () => { this.carregarEstatisticas(); this.carregarAba(this.abaAtiva); }
+    });
+  }
+
+  reabrir(id: number): void {
+    this.service.atualizarStatus(id, 'pendente').subscribe({
+      next: () => { this.carregarEstatisticas(); this.carregarAba(this.abaAtiva); }
+    });
+  }
+
+  get nivelAdmin(): boolean {
+    return (this.authService.getUsuario()?.nivelPermissao ?? 0) === 1;
   }
 }

@@ -115,5 +115,29 @@ namespace legendarios_API.Service
                 return new ResponseOneDTO() { Sucesso = false, Erro = ex.Message };
             }
         }
+
+        public ResponseOneDTO CadastrarLegendario(LegendariosDTO legendario)
+        {
+            return legendariosRepository.CadastrarLegendario(legendario);
+        }
+
+        public ResponseListDTO GetEstatisticasDashboard()
+        {
+            return legendariosRepository.GetEstatisticasDashboard();
+        }
+
+        public ResponseOneDTO AtualizarStatusLegendario(int idLegendario, string status)
+        {
+            var statusValidos = new[] { "pendente", "aprovado", "reprovado" };
+            if (!Array.Exists(statusValidos, s => s == status))
+                return new ResponseOneDTO { Sucesso = false, Erro = "Status inválido." };
+
+            return legendariosRepository.AtualizarStatusLegendario(idLegendario, status);
+        }
+
+        public ResponseListDTO GetLegendariosPorStatus(string status)
+        {
+            return legendariosRepository.GetLegendariosPorStatus(status);
+        }
     }
 }

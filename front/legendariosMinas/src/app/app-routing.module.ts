@@ -9,6 +9,7 @@ import { PagamentoCadastroSenderistaComponent } from './pages/cadastro-senderist
 import { StatusPagamentoComponent } from './pages/cadastro-senderistas/pagamento-cadastro-senderista/status-pagamento/status-pagamento.component';
 import { HomeComponent } from './pages/home/home.component';
 import { AuthGuard } from './guards/auth.guard';
+import { PreCadastroComponent } from './pages/pre-cadastro/pre-cadastro.component';
 
 const routes: Routes = [
   {
@@ -50,6 +51,10 @@ const routes: Routes = [
   {
     path: 'pagamento-senderista',
     component: PagamentoCadastroSenderistaComponent
+  },
+  {
+    path: 'pre-cadastro',
+    component: PreCadastroComponent
   }
 
 

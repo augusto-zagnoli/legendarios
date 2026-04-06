@@ -92,7 +92,7 @@ namespace legendarios_API.Entity
         /// <summary>
         /// indicar se o legendario frequenta celula
         /// </summary>
-        public bool frequanta_celula { get; set; }
+        public bool frequenta_celula { get; set; }
 
         /// <summary>
         /// qual rede o legendario faz parte Exemplo: WAKE, DINAMOS 
@@ -114,5 +114,20 @@ namespace legendarios_API.Entity
         /// </summary>
         public bool deletado { get; set; }
 
+        // ---- campos adicionados ----
+
+        public string cnh { get; set; }
+        public string categoria_cnh { get; set; }
+        public string endereco { get; set; }
+        public string cidade { get; set; }
+        public string estado { get; set; }
+        public string cep { get; set; }
+        public string pais { get; set; }
+        public string emergencia_nome { get; set; }
+        public string emergencia_telefone { get; set; }
+        public string tamanho_camiseta { get; set; }
+        public string observacoes { get; set; }
+        public DateTime? data_cadastro { get; set; }
+        public string status_cadastro { get; set; }
     }
 }

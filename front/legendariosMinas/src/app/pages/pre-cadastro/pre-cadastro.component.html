@@ -1,0 +1,197 @@
+<div class="container py-5" style="max-width: 800px; margin-top: 70px;">
+
+  <div class="text-center mb-4">
+    <img src="assets/imgTop/logoTop.png" alt="Logo" height="60">
+    <h2 class="mt-3 fw-bold">Pré-Cadastro de Senderista</h2>
+    <p class="text-muted">Preencha os dados abaixo para se inscrever. Nossa equipe entrará em contato.</p>
+  </div>
+
+  <div *ngIf="sucesso" class="alert alert-success text-center">
+    ✅ Cadastro enviado com sucesso! Em breve entraremos em contato.
+  </div>
+
+  <div *ngIf="erro" class="alert alert-danger">{{ erro }}</div>
+
+  <form [formGroup]="form" (ngSubmit)="enviar()" *ngIf="!sucesso">
+
+    <!-- Dados Pessoais -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-warning fw-bold">📋 Dados Pessoais</div>
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label">Nome completo *</label>
+            <input type="text" class="form-control" formControlName="nome"
+              [class.is-invalid]="invalido('nome')">
+            <div class="invalid-feedback">Nome é obrigatório (mínimo 3 chars).</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">E-mail *</label>
+            <input type="email" class="form-control" formControlName="email"
+              [class.is-invalid]="invalido('email')">
+            <div class="invalid-feedback">E-mail inválido.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Celular / WhatsApp *</label>
+            <input type="text" class="form-control" formControlName="celular"
+              placeholder="(99) 99999-9999" [class.is-invalid]="invalido('celular')">
+            <div class="invalid-feedback">Celular obrigatório.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">CPF / Documento *</label>
+            <input type="text" class="form-control" formControlName="cadastro_pessoa"
+              [class.is-invalid]="invalido('cadastro_pessoa')">
+            <div class="invalid-feedback">CPF obrigatório.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Data de Nascimento *</label>
+            <input type="date" class="form-control" formControlName="data_de_nascimento"
+              [class.is-invalid]="invalido('data_de_nascimento')">
+            <div class="invalid-feedback">Data obrigatória.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Estado Civil *</label>
+            <select class="form-select" formControlName="estado_civil"
+              [class.is-invalid]="invalido('estado_civil')">
+              <option value="">Selecione...</option>
+              <option *ngFor="let ec of estadosCivis" [value]="ec">{{ ec }}</option>
+            </select>
+            <div class="invalid-feedback">Estado civil obrigatório.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Tipo Sanguíneo *</label>
+            <select class="form-select" formControlName="tipo_sanguineo"
+              [class.is-invalid]="invalido('tipo_sanguineo')">
+              <option value="">Selecione...</option>
+              <option *ngFor="let ts of tiposSanguineos" [value]="ts">{{ ts }}</option>
+            </select>
+            <div class="invalid-feedback">Tipo sanguíneo obrigatório.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Tamanho da Camiseta *</label>
+            <select class="form-select" formControlName="tamanho_camiseta"
+              [class.is-invalid]="invalido('tamanho_camiseta')">
+              <option value="">Selecione...</option>
+              <option *ngFor="let t of tamanhosCamiseta" [value]="t">{{ t }}</option>
+            </select>
+            <div class="invalid-feedback">Tamanho obrigatório.</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Profissão e CNH -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-warning fw-bold">💼 Profissão e Habilitação</div>
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label">Profissão</label>
+            <input type="text" class="form-control" formControlName="profissao">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Nº CNH</label>
+            <input type="text" class="form-control" formControlName="cnh">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Categoria CNH</label>
+            <select class="form-select" formControlName="categoria_cnh">
+              <option value="">Sem CNH</option>
+              <option *ngFor="let c of categoriasCnh" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Endereço -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-warning fw-bold">📍 Endereço</div>
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-3">
+            <label class="form-label">CEP</label>
+            <input type="text" class="form-control" formControlName="cep"
+              placeholder="00000-000" (blur)="buscarCep()">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Endereço</label>
+            <input type="text" class="form-control" formControlName="endereco">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">País</label>
+            <input type="text" class="form-control" formControlName="pais">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Cidade</label>
+            <input type="text" class="form-control" formControlName="cidade">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Estado (UF)</label>
+            <input type="text" class="form-control" formControlName="estado" maxlength="2">
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Contato de Emergência -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-warning fw-bold">🚨 Contato de Emergência</div>
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label">Nome do contato *</label>
+            <input type="text" class="form-control" formControlName="emergencia_nome"
+              [class.is-invalid]="invalido('emergencia_nome')">
+            <div class="invalid-feedback">Campo obrigatório.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Telefone de emergência *</label>
+            <input type="text" class="form-control" formControlName="emergencia_telefone"
+              placeholder="(99) 99999-9999" [class.is-invalid]="invalido('emergencia_telefone')">
+            <div class="invalid-feedback">Campo obrigatório.</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Observações -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-warning fw-bold">📝 Observações</div>
+      <div class="card-body">
+        <textarea class="form-control" formControlName="observacoes" rows="3"
+          placeholder="Restrições alimentares, condições de saúde, informações relevantes..."></textarea>
+      </div>
+    </div>
+
+    <div class="d-grid">
+      <button type="submit" class="btn btn-warning btn-lg fw-bold" [disabled]="enviando">
+        <span *ngIf="enviando">Enviando...</span>
+        <span *ngIf="!enviando">Enviar Pré-Cadastro</span>
+      </button>
+    </div>
+
+  </form>
+</div>
