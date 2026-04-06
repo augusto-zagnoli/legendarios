@@ -47,23 +47,15 @@ namespace legendarios_API.Repository
 
         public int AtualizaToken(string idUsuario, string token)
         {
-            try
-            {
-                var sql = @"INSERT INTO tokens (token, id_usuario, dt_acesso, deletado)
-                            VALUES (@token, @idUsuario, @dtAcesso, 0)";
+            var sql = @"INSERT INTO tokens (token, id_usuario, dt_acesso, deletado)
+                        VALUES (@token, @idUsuario, @dtAcesso, 0)";
 
-                var result = this._conn.Execute(sql, new
-                {
-                    token,
-                    idUsuario = int.Parse(idUsuario),
-                    dtAcesso = DateTime.Now
-                });
-                return result;
-            }
-            catch (Exception)
+            return this._conn.Execute(sql, new
             {
-                return 0;
-            }
+                token,
+                idUsuario = int.Parse(idUsuario),
+                dtAcesso = DateTime.Now
+            });
         }
 
         public List<Tokens> GetTokens(string usuario)

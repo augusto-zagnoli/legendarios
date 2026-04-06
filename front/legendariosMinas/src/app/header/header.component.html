@@ -24,6 +24,13 @@
         style="margin-left: 1em ;"
         routerLink="/descricao-evento-senderista"
         >Cadastrar</button>
+
+        <ng-container *ngIf="estaLogado">
+          <span class="navbar-text ms-3" style="color: #adb5bd; font-size: 0.9em;">
+            <i>{{ usuarioLogado }}</i>
+          </span>
+          <button class="btn btn-outline-danger btn-sm ms-2" (click)="logout()">Sair</button>
+        </ng-container>
       </div>
     </div>
   </nav>

@@ -28,9 +28,10 @@ namespace legendarios_API.Service
             if (usuario == null || usuario.id_usuario == 0)
                 return null;
 
-            var token = GerarToken(usuario, parans.rememberUser);
+            var jti = Guid.NewGuid().ToString();
+            var token = GerarToken(usuario, parans.rememberUser, jti);
 
-            loginRepository.AtualizaToken(usuario.id_usuario.ToString(), token);
+            loginRepository.AtualizaToken(usuario.id_usuario.ToString(), jti);
 
             return new LoginResponseDTO
             {
@@ -41,14 +42,14 @@ namespace legendarios_API.Service
             };
         }
 
-        private string GerarToken(Usuarios usuario, bool rememberUser)
+        private string GerarToken(Usuarios usuario, bool rememberUser, string jti)
         {
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, usuario.id_usuario.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, usuario.n_lgnd ?? ""),
                 new Claim("nivel_permissao", usuario.nivel_permissao.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, jti)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
