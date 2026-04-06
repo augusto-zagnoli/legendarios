@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  baseURL: "https://legendarios.io:444/"
-  //baseURL: "https://localhost:5001/"
+  //baseURL: "https://legendarios.io:444/"
+  baseURL: "https://localhost:5001/"
 };
 
 /*

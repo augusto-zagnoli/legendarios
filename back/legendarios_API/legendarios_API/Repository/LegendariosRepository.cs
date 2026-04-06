@@ -19,7 +19,7 @@ namespace legendarios_API.Repository
     public class LegendariosRepository
     {
 
-        static string _connectionString = "Server=89.117.32.251;port=33;Database=DBLEGENDARIOS;Uid=root;Pwd=97514815";
+        static string _connectionString = "Server=187.77.245.217;port=3306;Database=DBLEGENDARIOS;Uid=root;Pwd=legendarioSenhaBanco";
         MySqlConnection _conn = new MySqlConnection(_connectionString);
 
 
@@ -27,7 +27,7 @@ namespace legendarios_API.Repository
         {
             try
             {
-                var sql = "SELECT DeptNo,DName,Location FROM Dept";
+                var sql = "SELECT DeptNo,DName,Location FROM dept";
                 var result = this._conn.Query<LegendariosDTO>(sql).ToList();
                 return result;
             }
@@ -41,7 +41,7 @@ namespace legendarios_API.Repository
         {
             try
             {
-                var sql = "SELECT DeptNo,DName,Location FROM Dept WHERE DeptNo = @DeptNo";
+                var sql = "SELECT DeptNo,DName,Location FROM dept WHERE DeptNo = @DeptNo";
                 var result = this._conn.Query<LegendariosDTO>(sql, new { DeptNo = deptNo }).FirstOrDefault();
 
                 var retorno = new ResponseListDTO()

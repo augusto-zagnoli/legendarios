@@ -8,6 +8,7 @@ import { DescricaoEventoCadastroSenderistaComponent } from './pages/cadastro-sen
 import { PagamentoCadastroSenderistaComponent } from './pages/cadastro-senderistas/pagamento-cadastro-senderista/pagamento-cadastro-senderista.component';
 import { StatusPagamentoComponent } from './pages/cadastro-senderistas/pagamento-cadastro-senderista/status-pagamento/status-pagamento.component';
 import { HomeComponent } from './pages/home/home.component';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
@@ -29,11 +30,13 @@ const routes: Routes = [
   },
   {
     path: 'home-adm',
-    component: HomeAdmComponent
+    component: HomeAdmComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'editar-legendario',
-    component: EditarLegendarioComponent
+    component: EditarLegendarioComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'status-pagamento',

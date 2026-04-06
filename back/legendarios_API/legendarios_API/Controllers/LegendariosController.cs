@@ -4,8 +4,10 @@ using legendarios_API.Models;
 using legendarios_API.Repository;
 using legendarios_API.Service;
 using MercadoPago.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -22,11 +24,12 @@ namespace legendarios_API.Controllers
 
         private readonly ILogger<LegendariosController> _logger;
         private LegendariosService _LegendariosService = new LegendariosService();
-        private LoginService _LoginService = new LoginService();
+        private readonly LoginService _LoginService;
 
-        public LegendariosController(ILogger<LegendariosController> logger)
+        public LegendariosController(ILogger<LegendariosController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _LoginService = new LoginService(configuration);
         }
 
         [HttpPost("trazer")]

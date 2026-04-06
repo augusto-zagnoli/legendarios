@@ -9,14 +9,14 @@ namespace legendarios_API.Repository
 {
     public class LoginRepository
     {
-        static string _connectionString = "Server=89.117.32.251;port=33;Database=DBLEGENDARIOS;Uid=root;Pwd=97514815";
+        static string _connectionString = "Server=187.77.245.217;port=3306;Database=DBLEGENDARIOS;Uid=root;Pwd=legendarioSenhaBanco";
         MySqlConnection _conn = new MySqlConnection(_connectionString);
 
         public List<Usuarios> GetUsuarios()
         {
             try
             {
-                var sql = "SELECT * FROM USUARIOS WHERE deletado = 0";
+                var sql = "SELECT * FROM usuarios WHERE deletado = 0";
 
                 var result = this._conn.Query<Usuarios>(sql).ToList();
                 return result;
@@ -31,36 +31,33 @@ namespace legendarios_API.Repository
         {
             try
             {
-                var sql = $@"SELECT * FROM USUARIOS WHERE 
-                                                            deletado = 0
-                                                    AND     n_lgnd = {usuario} 
-                                                    AND     chave = {senha}";
+                var sql = @"SELECT * FROM usuarios WHERE
+                                deletado = 0
+                            AND n_lgnd = @usuario
+                            AND chave = @senha";
 
-                var result = this._conn.Query<Usuarios>(sql).ToList().FirstOrDefault();
+                var result = this._conn.Query<Usuarios>(sql, new { usuario, senha }).FirstOrDefault();
                 return result;
             }
             catch (Exception)
             {
-                return new Usuarios();
+                return null;
             }
         }
 
-        public int AtualizaToken(string idUsuario)
+        public int AtualizaToken(string idUsuario, string token)
         {
             try
             {
-                var sql = $@"INSERT INTO `DBLEGENDARIOS`.`TOKENS`
-                                                                 (`token`,
-                                                                 `id_usuario`,
-                                                                 `dt_acesso`,
-                                                                 `deletado`)
-                                                                 VALUES
-                                                                 ('TOKENS-TESTE-{DateTime.Now}',
-                                                                 {idUsuario},
-                                                                 STR_TO_DATE('{DateTime.Now.ToString().Replace('/', '-')}', '%d-%m-%Y %H:%i:%s'),
-                                                                 0)";
+                var sql = @"INSERT INTO tokens (token, id_usuario, dt_acesso, deletado)
+                            VALUES (@token, @idUsuario, @dtAcesso, 0)";
 
-                var result = this._conn.Execute(sql);
+                var result = this._conn.Execute(sql, new
+                {
+                    token,
+                    idUsuario = int.Parse(idUsuario),
+                    dtAcesso = DateTime.Now
+                });
                 return result;
             }
             catch (Exception)
@@ -73,11 +70,9 @@ namespace legendarios_API.Repository
         {
             try
             {
-                var sql = $@"SELECT * FROM TOKENS WHERE 
-                                                            deletado = 0
-                                                    AND     id_usuario = {usuario}";
+                var sql = @"SELECT * FROM tokens WHERE deletado = 0 AND id_usuario = @idUsuario";
 
-                var result = this._conn.Query<Tokens>(sql).ToList();
+                var result = this._conn.Query<Tokens>(sql, new { idUsuario = int.Parse(usuario) }).ToList();
                 return result;
             }
             catch (Exception)

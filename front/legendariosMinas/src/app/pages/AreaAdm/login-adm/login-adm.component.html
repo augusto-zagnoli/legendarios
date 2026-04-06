@@ -3,29 +3,34 @@
   <div style="margin-top: 50px;"></div>
 
   <main class="form-signin w-100 m-auto">
-    <form>
+    <form [formGroup]="form" (ngSubmit)="entrar()">
 
       <img class="mb-4" src="../../assets/imgTop/logoTop.png" alt="" width="72" height="57">
       <h1 class="h3 mb-3 fw-normal">Login</h1>
 
       <div class="form-floating">
-        <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-        <label for="floatingInput">Email</label>
+        <input type="text" class="form-control" id="floatingInput" placeholder="Usuário" formControlName="login">
+        <label for="floatingInput">Usuário</label>
       </div>
 
       <div class="form-floating">
-        <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
+        <input type="password" class="form-control" id="floatingPassword" placeholder="Senha" formControlName="password">
         <label for="floatingPassword">Senha</label>
       </div>
 
+      <div *ngIf="erro" class="alert alert-danger mt-2 py-2">{{ erro }}</div>
+
       <div class="checkbox mb-3">
         <label>
-          <input type="checkbox" value="remember-me"> Lembrar Senha
+          <input type="checkbox" formControlName="rememberUser"> Lembrar Senha
         </label>
       </div>
 
-      <button class="w-100 btn btn-lg btn-primary" type="submit">Entrar</button>
-      <p class="mt-5 mb-3 text-muted">&copy; Legendarios - Minas - 2023 </p>
+      <button class="w-100 btn btn-lg btn-primary" type="submit" [disabled]="form.invalid || carregando">
+        <span *ngIf="carregando">Entrando...</span>
+        <span *ngIf="!carregando">Entrar</span>
+      </button>
+      <p class="mt-5 mb-3 text-muted">&copy; Lendários - Minas - 2023 </p>
 
     </form>
   </main>

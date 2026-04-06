@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { environment } from 'src/environments/environment';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-login-adm',
@@ -7,15 +9,45 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./login-adm.component.css'],
 })
 export class LoginAdmComponent implements OnInit {
-  private BASEURL = `${environment.baseURL}`;
+  form: FormGroup;
+  erro: string = '';
+  carregando: boolean = false;
 
-  constructor() {}
-
-  //urlLogin = "https://localhost:5001/adm-login"
-
-  urlLogin = `${this.BASEURL}adm-login`;
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.form = this.fb.group({
+      login: ['', Validators.required],
+      password: ['', Validators.required],
+      rememberUser: [false]
+    });
+  }
 
   ngOnInit(): void {
     sessionStorage.setItem('ExibeRodape', '0');
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/home-adm']);
+    }
+  }
+
+  entrar(): void {
+    if (this.form.invalid) return;
+    this.carregando = true;
+    this.erro = '';
+    const { login, password, rememberUser } = this.form.value;
+    this.authService.login(login, password, rememberUser).subscribe({
+      next: () => {
+        this.carregando = false;
+        this.router.navigate(['/home-adm']);
+      },
+      error: (err) => {
+        this.carregando = false;
+        this.erro = err.status === 401
+          ? 'Usuário ou senha inválidos.'
+          : 'Erro ao realizar login. Tente novamente.';
+      }
+    });
   }
 }
