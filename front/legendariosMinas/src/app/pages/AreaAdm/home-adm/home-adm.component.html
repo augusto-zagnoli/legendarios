@@ -22,7 +22,7 @@
         <span class="sidebar-icon">📢</span>
         <span class="sidebar-label">Ações Sociais</span>
       </li>
-      <li [class.active]="secaoAtiva === 'usuarios'" (click)="secaoAtiva = 'usuarios'">
+      <li [class.active]="secaoAtiva === 'usuarios'" (click)="irParaUsuarios()">
         <span class="sidebar-icon">🔑</span>
         <span class="sidebar-label">Usuários</span>
       </li>
@@ -281,70 +281,153 @@
         <div class="spinner-border text-warning"></div>
       </div>
 
-      <div class="row g-3" *ngIf="!carregandoAnuncios">
-        <div class="col-12 col-md-6 col-lg-4" *ngFor="let a of listaAnuncios">
-          <div class="card h-100 shadow-sm border-0">
-            <img [src]="a.imagem_url" class="card-img-top" alt="{{ a.titulo }}"
-              style="height: 160px; object-fit: cover;"
-              onerror="this.src='assets/imgTop/logoTop.png'">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start">
-                <h6 class="fw-bold">{{ a.titulo }}</h6>
-                <span class="badge" [class.bg-success]="a.ativo" [class.bg-secondary]="!a.ativo">
-                  {{ a.ativo ? 'Ativo' : 'Inativo' }}
-                </span>
-              </div>
-              <p class="small text-muted">{{ a.texto }}</p>
-            </div>
-            <div class="card-footer bg-white border-0 d-flex gap-2">
-              <button class="btn btn-sm btn-outline-primary w-50" (click)="editarAnuncio(a)">Editar</button>
-              <button class="btn btn-sm btn-outline-danger w-50" (click)="confirmarDeletarAnuncio(a.id_anuncio)">Excluir</button>
-            </div>
+      <div class="card shadow-sm border-0" *ngIf="!carregandoAnuncios">
+        <div class="card-body p-0">
+          <div *ngIf="listaAnuncios.length === 0" class="text-center text-muted py-5">
+            Nenhum anúncio cadastrado ainda.
           </div>
-        </div>
-        <div *ngIf="listaAnuncios.length === 0" class="col-12 text-center text-muted py-4">
-          Nenhum anúncio cadastrado ainda.
+          <div class="table-responsive" *ngIf="listaAnuncios.length > 0">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Título</th>
+                  <th>Status</th>
+                  <th>Criado em</th>
+                  <th>Criado por</th>
+                  <th>Modificado em</th>
+                  <th>Modificado por</th>
+                  <th class="text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let a of listaAnuncios">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <img [src]="a.imagem_url" alt="" width="40" height="40"
+                        style="object-fit:cover; border-radius:6px;"
+                        onerror="this.src='assets/imgTop/logoTop.png'">
+                      <span class="fw-semibold">{{ a.titulo }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [class.bg-success]="a.ativo" [class.bg-secondary]="!a.ativo">
+                      {{ a.ativo ? 'Ativo' : 'Inativo' }}
+                    </span>
+                  </td>
+                  <td class="text-nowrap small">{{ a.criado_em | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="small">{{ a.criado_por || '—' }}</td>
+                  <td class="text-nowrap small">{{ a.atualizado_em | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="small">{{ a.modificado_por || '—' }}</td>
+                  <td class="text-center text-nowrap">
+                    <button class="btn btn-sm btn-outline-primary me-1" (click)="editarAnuncio(a)">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="confirmarDeletarAnuncio(a.id_anuncio)">Excluir</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ══ USUÁRIOS ══ -->
     <section *ngIf="secaoAtiva === 'usuarios'">
-      <h4 class="section-title">Usuários Administradores</h4>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="section-title mb-0">Usuários Administradores</h4>
+        <button class="btn btn-success btn-sm" (click)="abrirModalUsuario()">+ Novo Usuário</button>
+      </div>
 
-      <div class="card shadow-sm" style="max-width: 480px;">
-        <div class="card-header bg-white fw-bold">Criar novo usuário</div>
-        <div class="card-body">
-          <div class="alert alert-danger py-2" *ngIf="erroUsuario">{{ erroUsuario }}</div>
-          <div class="alert alert-success py-2" *ngIf="sucessoUsuario">{{ sucessoUsuario }}</div>
-          <div class="mb-3">
-            <label class="form-label">Login <span class="text-danger">*</span></label>
-            <input class="form-control" [(ngModel)]="novoUsuario.login" placeholder="Ex: joao.silva" autocomplete="username">
+      <div *ngIf="carregandoUsuarios" class="text-center py-4">
+        <div class="spinner-border text-warning"></div>
+      </div>
+
+      <div class="card shadow-sm border-0" *ngIf="!carregandoUsuarios">
+        <div class="card-body p-0">
+          <div *ngIf="listaUsuarios.length === 0" class="text-center text-muted py-5">
+            Nenhum usuário cadastrado ainda.
           </div>
-          <div class="mb-3">
-            <label class="form-label">Senha <span class="text-danger">*</span></label>
-            <input type="password" class="form-control" [(ngModel)]="novoUsuario.senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <div class="table-responsive" *ngIf="listaUsuarios.length > 0">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Login</th>
+                  <th>Nível</th>
+                  <th class="text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of listaUsuarios">
+                  <td class="fw-semibold">
+                    <span class="me-2">&#128274;</span>{{ u.n_lgnd }}
+                  </td>
+                  <td>
+                    <span class="badge" [class.bg-primary]="u.nivel_permissao === 1" [class.bg-secondary]="u.nivel_permissao !== 1">
+                      {{ u.nivel_permissao === 1 ? 'Administrador' : 'Visualizador' }}
+                    </span>
+                  </td>
+                  <td class="text-center text-nowrap">
+                    <button class="btn btn-sm btn-outline-primary me-1" (click)="editarUsuario(u)">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="confirmarDeletarUsuario(u.id_usuario)">Remover</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Confirmar Senha <span class="text-danger">*</span></label>
-            <input type="password" class="form-control" [(ngModel)]="novoUsuario.confirmaSenha" placeholder="Repita a senha" autocomplete="new-password">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Nível de Permissão</label>
-            <select class="form-select" [(ngModel)]="novoUsuario.nivel_permissao">
-              <option [ngValue]="1">1 — Administrador</option>
-              <option [ngValue]="0">0 — Visualizador</option>
-            </select>
-          </div>
-          <button class="btn btn-primary w-100" (click)="salvarNovoUsuario()" [disabled]="salvandoUsuario">
-            <span *ngIf="salvandoUsuario" class="spinner-border spinner-border-sm me-1"></span>
-            {{ salvandoUsuario ? 'Salvando...' : 'Criar Usuário' }}
-          </button>
         </div>
       </div>
     </section>
 
   </main>
+</div>
+
+<!-- ══ Modal Usuário ══ -->
+<div class="modal-backdrop fade show" *ngIf="modalUsuarioVisivel" style="z-index:1040;"></div>
+<div class="modal d-block" tabindex="-1" *ngIf="modalUsuarioVisivel" style="z-index:1050;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ usuarioForm.id_usuario ? 'Editar' : 'Novo' }} Usuário</h5>
+        <button type="button" class="btn-close" (click)="fecharModalUsuario()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger py-2" *ngIf="erroUsuario">{{ erroUsuario }}</div>
+        <div class="alert alert-success py-2" *ngIf="sucessoUsuario">{{ sucessoUsuario }}</div>
+        <div class="mb-3">
+          <label class="form-label">Login <span class="text-danger">*</span></label>
+          <input class="form-control" [(ngModel)]="usuarioForm.login" placeholder="Ex: joao.silva" autocomplete="username">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">
+            {{ usuarioForm.id_usuario ? 'Nova Senha' : 'Senha' }}
+            <span class="text-danger" *ngIf="!usuarioForm.id_usuario">*</span>
+            <small class="text-muted ms-1" *ngIf="usuarioForm.id_usuario">(deixe em branco para não alterar)</small>
+          </label>
+          <input type="password" class="form-control" [(ngModel)]="usuarioForm.senha"
+            [placeholder]="usuarioForm.id_usuario ? 'Nova senha (opcional)' : 'Mínimo 6 caracteres'"
+            autocomplete="new-password">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Confirmar Senha</label>
+          <input type="password" class="form-control" [(ngModel)]="usuarioForm.confirmaSenha"
+            placeholder="Repita a senha" autocomplete="new-password">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Nível de Permissão</label>
+          <select class="form-select" [(ngModel)]="usuarioForm.nivel_permissao">
+            <option [ngValue]="1">Administrador</option>
+            <option [ngValue]="0">Visualizador</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fecharModalUsuario()" [disabled]="salvandoUsuario">Cancelar</button>
+        <button class="btn btn-primary" (click)="salvarNovoUsuario()" [disabled]="salvandoUsuario">
+          <span *ngIf="salvandoUsuario" class="spinner-border spinner-border-sm me-1"></span>
+          {{ salvandoUsuario ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ Modal Anúncio ══ -->

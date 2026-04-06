@@ -157,6 +157,11 @@ export class HomeAdmComponent implements OnInit {
     });
   }
 
+  irParaUsuarios(): void {
+    this.secaoAtiva = 'usuarios';
+    this.carregarUsuarios();
+  }
+
   irParaCadastros(): void {
     this.secaoAtiva = 'cadastros';
     if (this.abaAtiva !== 'pendente' && this.abaAtiva !== 'aprovado' && this.abaAtiva !== 'reprovado') {
@@ -196,15 +201,35 @@ export class HomeAdmComponent implements OnInit {
     return (this.authService.getUsuario()?.nivelPermissao ?? 0) === 1;
   }
 
-  // ─── Modal Novo Usuário ───────────────────────────────────────────
+  // ─── Usuários ─────────────────────────────────────────────────────
+  listaUsuarios: any[] = [];
+  carregandoUsuarios = false;
   modalUsuarioVisivel = false;
-  novoUsuario = { login: '', senha: '', confirmaSenha: '', nivel_permissao: 0 };
+  usuarioForm: any = { id_usuario: null, login: '', senha: '', confirmaSenha: '', nivel_permissao: 0 };
   salvandoUsuario = false;
   erroUsuario = '';
   sucessoUsuario = '';
 
+  carregarUsuarios(): void {
+    this.carregandoUsuarios = true;
+    this.service.getUsuarios().subscribe({
+      next: (res) => {
+        this.listaUsuarios = res.sucesso ? (res.data ?? []) : [];
+        this.carregandoUsuarios = false;
+      },
+      error: () => { this.carregandoUsuarios = false; }
+    });
+  }
+
   abrirModalUsuario(): void {
-    this.novoUsuario = { login: '', senha: '', confirmaSenha: '', nivel_permissao: 0 };
+    this.usuarioForm = { id_usuario: null, login: '', senha: '', confirmaSenha: '', nivel_permissao: 0 };
+    this.erroUsuario = '';
+    this.sucessoUsuario = '';
+    this.modalUsuarioVisivel = true;
+  }
+
+  editarUsuario(u: any): void {
+    this.usuarioForm = { id_usuario: u.id_usuario, login: u.n_lgnd, senha: '', confirmaSenha: '', nivel_permissao: u.nivel_permissao };
     this.erroUsuario = '';
     this.sucessoUsuario = '';
     this.modalUsuarioVisivel = true;
@@ -218,31 +243,68 @@ export class HomeAdmComponent implements OnInit {
     this.erroUsuario = '';
     this.sucessoUsuario = '';
 
-    if (!this.novoUsuario.login.trim()) {
+    if (!this.usuarioForm.login.trim()) {
       this.erroUsuario = 'Login é obrigatório.'; return;
     }
-    if (this.novoUsuario.senha.length < 6) {
+
+    // Criação — senha obrigatória
+    if (!this.usuarioForm.id_usuario && this.usuarioForm.senha.length < 6) {
       this.erroUsuario = 'Senha deve ter pelo menos 6 caracteres.'; return;
     }
-    if (this.novoUsuario.senha !== this.novoUsuario.confirmaSenha) {
+    // Edição — senha só valida se preenchida
+    if (this.usuarioForm.id_usuario && this.usuarioForm.senha && this.usuarioForm.senha.length < 6) {
+      this.erroUsuario = 'Nova senha deve ter pelo menos 6 caracteres.'; return;
+    }
+    if (this.usuarioForm.senha !== this.usuarioForm.confirmaSenha) {
       this.erroUsuario = 'As senhas não coincidem.'; return;
     }
 
     this.salvandoUsuario = true;
-    this.service.criarUsuario(
-      this.novoUsuario.login,
-      this.novoUsuario.senha,
-      this.novoUsuario.nivel_permissao
-    ).subscribe({
-      next: (res) => {
-        this.salvandoUsuario = false;
-        this.sucessoUsuario = 'Usuário criado com sucesso!';
-        setTimeout(() => this.fecharModalUsuario(), 1500);
-      },
-      error: (err) => {
-        this.salvandoUsuario = false;
-        this.erroUsuario = err?.error?.mensagem || 'Erro ao criar usuário.';
-      }
+
+    if (this.usuarioForm.id_usuario) {
+      // Editar
+      this.service.atualizarUsuario({
+        id_usuario: this.usuarioForm.id_usuario,
+        login: this.usuarioForm.login,
+        nivel_permissao: this.usuarioForm.nivel_permissao,
+        nova_senha: this.usuarioForm.senha || undefined
+      }).subscribe({
+        next: () => {
+          this.salvandoUsuario = false;
+          this.sucessoUsuario = 'Usuário atualizado com sucesso!';
+          this.carregarUsuarios();
+          setTimeout(() => this.fecharModalUsuario(), 1200);
+        },
+        error: (err: any) => {
+          this.salvandoUsuario = false;
+          this.erroUsuario = err?.error?.mensagem || 'Erro ao atualizar usuário.';
+        }
+      });
+    } else {
+      // Criar
+      this.service.criarUsuario(
+        this.usuarioForm.login,
+        this.usuarioForm.senha,
+        this.usuarioForm.nivel_permissao
+      ).subscribe({
+        next: () => {
+          this.salvandoUsuario = false;
+          this.sucessoUsuario = 'Usuário criado com sucesso!';
+          this.carregarUsuarios();
+          setTimeout(() => this.fecharModalUsuario(), 1200);
+        },
+        error: (err: any) => {
+          this.salvandoUsuario = false;
+          this.erroUsuario = err?.error?.mensagem || 'Erro ao criar usuário.';
+        }
+      });
+    }
+  }
+
+  confirmarDeletarUsuario(id: number): void {
+    if (!confirm('Tem certeza que deseja remover este usuário?')) return;
+    this.service.deletarUsuario(id).subscribe({
+      next: () => this.carregarUsuarios()
     });
   }
 

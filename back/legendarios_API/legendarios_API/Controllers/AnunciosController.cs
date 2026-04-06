@@ -37,6 +37,7 @@ namespace legendarios_API.Controllers
         [Authorize]
         public ActionResult<AnuncioResponseOneDTO> Post([FromBody] AnuncioDTO dto)
         {
+            dto.criado_por = User.Identity?.Name;
             return Ok(_service.Criar(dto));
         }
 
@@ -44,6 +45,7 @@ namespace legendarios_API.Controllers
         [Authorize]
         public ActionResult<AnuncioResponseOneDTO> Put([FromBody] AnuncioDTO dto)
         {
+            dto.modificado_por = User.Identity?.Name;
             return Ok(_service.Atualizar(dto));
         }
 

@@ -58,6 +58,18 @@ export class LegendariosPublicoService {
     return this.http.post(`${environment.baseURL}adm-usuarios`, { login, senha, nivel_permissao: nivelPermissao });
   }
 
+  getUsuarios(): Observable<any> {
+    return this.http.get(`${environment.baseURL}adm-usuarios`);
+  }
+
+  atualizarUsuario(dto: { id_usuario: number; login: string; nivel_permissao: number; nova_senha?: string }): Observable<any> {
+    return this.http.put(`${environment.baseURL}adm-usuarios`, dto);
+  }
+
+  deletarUsuario(id: number): Observable<any> {
+    return this.http.delete(`${environment.baseURL}adm-usuarios/${id}`);
+  }
+
   // ---- Anúncios ----
   getAnuncios(): Observable<any> {
     return this.http.get(`${environment.baseURL}anuncios`);

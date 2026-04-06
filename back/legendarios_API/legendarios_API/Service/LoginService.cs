@@ -4,6 +4,7 @@ using legendarios_API.Repository;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -90,6 +91,28 @@ namespace legendarios_API.Service
 
             loginRepository.CriarUsuario(dto.login, dto.senha, dto.nivel_permissao, idUsuarioCriacao);
             return (true, "");
+        }
+
+        public List<legendarios_API.Entity.Usuarios> GetTodosUsuarios()
+        {
+            return loginRepository.GetTodosUsuarios();
+        }
+
+        public (bool sucesso, string erro) AtualizarUsuario(AtualizarUsuarioDTO dto, int idEdicao)
+        {
+            if (string.IsNullOrWhiteSpace(dto.login))
+                return (false, "Login não pode ser vazio.");
+
+            if (!string.IsNullOrWhiteSpace(dto.nova_senha) && dto.nova_senha.Length < 6)
+                return (false, "Nova senha deve ter pelo menos 6 caracteres.");
+
+            loginRepository.AtualizarUsuario(dto.id_usuario, dto.login, dto.nivel_permissao, dto.nova_senha, idEdicao);
+            return (true, "");
+        }
+
+        public void DeletarUsuario(int id, int idDelecao)
+        {
+            loginRepository.DeletarUsuario(id, idDelecao);
         }
     }
 }

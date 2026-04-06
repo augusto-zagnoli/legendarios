@@ -54,8 +54,8 @@ namespace legendarios_API.Repository
             try
             {
                 using var conn = Conn();
-                var sql = @"INSERT INTO anuncios (titulo, imagem_url, texto, link, ativo, ordem)
-                            VALUES (@titulo, @imagem_url, @texto, @link, @ativo, @ordem);
+                var sql = @"INSERT INTO anuncios (titulo, imagem_url, texto, link, ativo, ordem, criado_por)
+                            VALUES (@titulo, @imagem_url, @texto, @link, @ativo, @ordem, @criado_por);
                             SELECT LAST_INSERT_ID();";
                 var id = conn.ExecuteScalar<int>(sql, dto);
                 var anuncio = conn.QueryFirstOrDefault<Anuncio>("SELECT * FROM anuncios WHERE id_anuncio = @id", new { id });
@@ -73,7 +73,8 @@ namespace legendarios_API.Repository
             {
                 using var conn = Conn();
                 var sql = @"UPDATE anuncios SET titulo = @titulo, imagem_url = @imagem_url,
-                            texto = @texto, link = @link, ativo = @ativo, ordem = @ordem
+                            texto = @texto, link = @link, ativo = @ativo, ordem = @ordem,
+                            modificado_por = @modificado_por, atualizado_em = NOW()
                             WHERE id_anuncio = @id_anuncio";
                 conn.Execute(sql, dto);
                 var anuncio = conn.QueryFirstOrDefault<Anuncio>("SELECT * FROM anuncios WHERE id_anuncio = @id_anuncio", dto);

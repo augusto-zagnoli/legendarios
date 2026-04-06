@@ -4,17 +4,23 @@
 -- =============================================
 
 CREATE TABLE IF NOT EXISTS anuncios (
-    id_anuncio    INT           NOT NULL AUTO_INCREMENT,
-    titulo        VARCHAR(200)  NOT NULL,
-    imagem_url    VARCHAR(500)  NOT NULL,
-    texto         TEXT          NOT NULL,
-    link          VARCHAR(500)  NULL,
-    ativo         TINYINT(1)    NOT NULL DEFAULT 1,
-    ordem         INT           NOT NULL DEFAULT 0,
-    criado_em     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    atualizado_em DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id_anuncio     INT           NOT NULL AUTO_INCREMENT,
+    titulo         VARCHAR(200)  NOT NULL,
+    imagem_url     VARCHAR(500)  NOT NULL,
+    texto          TEXT          NOT NULL,
+    link           VARCHAR(500)  NULL,
+    ativo          TINYINT(1)    NOT NULL DEFAULT 1,
+    ordem          INT           NOT NULL DEFAULT 0,
+    criado_em      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    criado_por     VARCHAR(100)  NULL,
+    modificado_por VARCHAR(100)  NULL,
     PRIMARY KEY (id_anuncio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Se a tabela já existir, execute os ALTERs abaixo manualmente:
+ALTER TABLE anuncios ADD COLUMN criado_por    VARCHAR(100) NULL;
+ALTER TABLE anuncios ADD COLUMN modificado_por VARCHAR(100) NULL;
 
 -- Exemplo de insert
 INSERT INTO anuncios (titulo, imagem_url, texto, link, ativo, ordem)

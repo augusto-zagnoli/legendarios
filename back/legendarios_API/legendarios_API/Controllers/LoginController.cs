@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
+using legendarios_API.Entity;
 
 namespace legendarios_API.Controllers
 {
@@ -59,6 +61,60 @@ namespace legendarios_API.Controllers
             {
                 _logger.LogError(ex, "Erro ao criar usuário");
                 return StatusCode(500, new { mensagem = "Erro interno ao criar usuário." });
+            }
+        }
+
+        [Authorize]
+        [HttpGet("/adm-usuarios")]
+        public IActionResult ListarUsuarios()
+        {
+            try
+            {
+                var lista = _loginService.GetTodosUsuarios();
+                return Ok(new { sucesso = true, data = lista });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao listar usuários");
+                return StatusCode(500, new { mensagem = "Erro interno ao listar usuários." });
+            }
+        }
+
+        [Authorize]
+        [HttpPut("/adm-usuarios")]
+        public IActionResult AtualizarUsuario([FromBody] AtualizarUsuarioDTO dto)
+        {
+            try
+            {
+                var idEditor = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+                var (sucesso, erro) = _loginService.AtualizarUsuario(dto, idEditor);
+
+                if (!sucesso)
+                    return BadRequest(new { mensagem = erro });
+
+                return Ok(new { mensagem = "Usuário atualizado com sucesso." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar usuário");
+                return StatusCode(500, new { mensagem = "Erro interno ao atualizar usuário." });
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("/adm-usuarios/{id}")]
+        public IActionResult DeletarUsuario(int id)
+        {
+            try
+            {
+                var idDelecao = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+                _loginService.DeletarUsuario(id, idDelecao);
+                return Ok(new { mensagem = "Usuário removido com sucesso." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao deletar usuário");
+                return StatusCode(500, new { mensagem = "Erro interno ao remover usuário." });
             }
         }
     }

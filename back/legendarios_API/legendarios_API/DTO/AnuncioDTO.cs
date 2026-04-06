@@ -9,5 +9,7 @@ namespace legendarios_API.DTO
         public string link { get; set; }
         public bool ativo { get; set; } = true;
         public int ordem { get; set; } = 0;
+        public string criado_por { get; set; }
+        public string modificado_por { get; set; }
     }
 }

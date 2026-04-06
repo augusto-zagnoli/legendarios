@@ -13,6 +13,8 @@ namespace legendarios_API.Entity
         public int ordem { get; set; }
         public DateTime criado_em { get; set; }
         public DateTime atualizado_em { get; set; }
+        public string criado_por { get; set; }
+        public string modificado_por { get; set; }
     }
 
     public class AnuncioResponseListDTO

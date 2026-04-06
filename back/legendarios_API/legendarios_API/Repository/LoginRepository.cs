@@ -88,5 +88,43 @@ namespace legendarios_API.Repository
             this._conn.Execute(sql, new { login, senha, nivelPermissao, idUsuarioCriacao });
         }
 
+        public List<Usuarios> GetTodosUsuarios()
+        {
+            try
+            {
+                var sql = "SELECT id_usuario, n_lgnd, nivel_permissao, id_usuario_criacao, data_edicao, id_usuario_edicao FROM usuarios WHERE deletado = 0 ORDER BY id_usuario ASC";
+                return this._conn.Query<Usuarios>(sql).ToList();
+            }
+            catch (Exception)
+            {
+                return new List<Usuarios>();
+            }
+        }
+
+        public void AtualizarUsuario(int id, string login, int nivelPermissao, string novaSenha, int idEdicao)
+        {
+            if (!string.IsNullOrWhiteSpace(novaSenha))
+            {
+                var sql = @"UPDATE usuarios SET n_lgnd = @login, nivel_permissao = @nivelPermissao,
+                            chave = @novaSenha, data_edicao = NOW(), id_usuario_edicao = @idEdicao
+                            WHERE id_usuario = @id AND deletado = 0";
+                this._conn.Execute(sql, new { id, login, nivelPermissao, novaSenha, idEdicao });
+            }
+            else
+            {
+                var sql = @"UPDATE usuarios SET n_lgnd = @login, nivel_permissao = @nivelPermissao,
+                            data_edicao = NOW(), id_usuario_edicao = @idEdicao
+                            WHERE id_usuario = @id AND deletado = 0";
+                this._conn.Execute(sql, new { id, login, nivelPermissao, idEdicao });
+            }
+        }
+
+        public void DeletarUsuario(int id, int idDelecao)
+        {
+            var sql = @"UPDATE usuarios SET deletado = 1, data_delecao = NOW(), id_usuario_delecao = @idDelecao
+                        WHERE id_usuario = @id";
+            this._conn.Execute(sql, new { id, idDelecao });
+        }
+
     }
 }
