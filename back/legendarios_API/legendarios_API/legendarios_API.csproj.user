@@ -2,7 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ActiveDebugProfile>legendarios_API</ActiveDebugProfile>
-    <NameOfLastUsedPublishProfile>C:\Users\brunsker\Desktop\Projects\pessoais\legendarios\back\legendarios_API\legendarios_API\Properties\PublishProfiles\registry.hub.docker.com_pablozagnolibrunsker.pubxml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>C:\Users\Augusto Zagnoli\Desktop\Projects\legendarios\back\legendarios_API\legendarios_API\Properties\PublishProfiles\registry.hub.docker.com_pablozagnoli.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>

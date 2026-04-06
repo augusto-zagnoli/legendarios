@@ -9,5 +9,5 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=build /usr/src/app/dist/my-app /usr/share/nginx/html
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 443
+EXPOSE 80 443
 CMD ["nginx", "-g", "daemon off;"]
