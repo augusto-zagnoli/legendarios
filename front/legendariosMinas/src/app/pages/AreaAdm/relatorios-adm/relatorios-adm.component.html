@@ -1,0 +1,75 @@
+<h4 class="section-title">Relatórios</h4>
+
+<!-- Exportações rápidas -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-4">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-2 mb-2">📋</div>
+      <div class="fw-bold mb-2">Legendários (CSV)</div>
+      <button class="btn btn-sm btn-outline-primary" (click)="exportarLegendarios()" [disabled]="exportando">
+        <span *ngIf="exportando" class="spinner-border spinner-border-sm me-1"></span>
+        Exportar
+      </button>
+    </div>
+  </div>
+</div>
+<div *ngIf="msgExport" class="alert py-2 mb-4"
+  [class.alert-success]="msgExport.includes('concluída')"
+  [class.alert-danger]="msgExport.includes('Erro')">
+  {{ msgExport }}
+</div>
+
+<!-- Auditoria -->
+<h5 class="fw-bold mb-3">Log de Auditoria</h5>
+
+<div *ngIf="carregandoAudit" class="text-center py-4">
+  <div class="spinner-border text-warning"></div>
+</div>
+
+<div class="card shadow-sm border-0" *ngIf="!carregandoAudit">
+  <div class="card-body p-0">
+    <div *ngIf="auditorias.length === 0" class="text-center text-muted py-5">Nenhum registro de auditoria.</div>
+    <div class="table-responsive" *ngIf="auditorias.length > 0">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Data</th>
+            <th>Tabela</th>
+            <th>Ação</th>
+            <th>Registro</th>
+            <th>Usuário</th>
+            <th>Detalhes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of auditorias">
+            <td class="text-nowrap small">{{ a.data_acao | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td><span class="badge bg-light text-dark">{{ a.tabela }}</span></td>
+            <td>
+              <span class="badge"
+                [class.bg-success]="a.acao === 'INSERT'"
+                [class.bg-warning]="a.acao === 'UPDATE'"
+                [class.bg-danger]="a.acao === 'DELETE'"
+                [class.bg-info]="a.acao !== 'INSERT' && a.acao !== 'UPDATE' && a.acao !== 'DELETE'">
+                {{ a.acao }}
+              </span>
+            </td>
+            <td class="small">{{ a.id_registro }}</td>
+            <td class="small">{{ a.nome_usuario || '—' }}</td>
+            <td class="small text-truncate" style="max-width: 200px;" [title]="a.dados_novos || ''">
+              {{ a.dados_novos || '—' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center" *ngIf="totalPaginasAudit > 1">
+    <span class="small text-muted">{{ totalAudit }} registro(s) · Página {{ paginaAudit }}/{{ totalPaginasAudit }}</span>
+    <div>
+      <button class="btn btn-sm btn-outline-secondary me-1" [disabled]="paginaAudit <= 1" (click)="irPaginaAudit(paginaAudit - 1)">‹ Anterior</button>
+      <button class="btn btn-sm btn-outline-secondary" [disabled]="paginaAudit >= totalPaginasAudit" (click)="irPaginaAudit(paginaAudit + 1)">Próxima ›</button>
+    </div>
+  </div>
+</div>

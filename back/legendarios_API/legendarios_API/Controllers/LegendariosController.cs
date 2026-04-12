@@ -1,19 +1,10 @@
-﻿using AutoMapper;
-using legendarios_API.DTO;
+﻿using legendarios_API.DTO;
 using legendarios_API.Entity;
+using legendarios_API.Interfaces;
 using legendarios_API.Models;
-using legendarios_API.Repository;
-using legendarios_API.Service;
-using MercadoPago.Http;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace legendarios_API.Controllers
@@ -22,87 +13,73 @@ namespace legendarios_API.Controllers
     [Route("legendarios")]
     public class LegendariosController : ControllerBase
     {
-
         private readonly ILogger<LegendariosController> _logger;
-        private LegendariosService _LegendariosService = new LegendariosService();
-        private readonly LoginService _LoginService;
+        private readonly ILegendariosService _legendarioService;
+        private readonly ILoginService _loginService;
 
-        public LegendariosController(ILogger<LegendariosController> logger, IConfiguration configuration)
+        public LegendariosController(ILogger<LegendariosController> logger, ILegendariosService legendarioService, ILoginService loginService)
         {
             _logger = logger;
-            _LoginService = new LoginService(configuration);
+            _legendarioService = legendarioService;
+            _loginService = loginService;
         }
 
         [HttpPost("trazer")]
-        public async Task<ActionResult<ResponseListDTO>> GetLegendarios([FromBody] LegendariosParams param)
+        public ActionResult<ResponseListDTO> GetLegendarios([FromBody] LegendariosParams param)
         {
-            var logado = _LoginService.VerificaSeEstaLogado(param.Id_Usuario.ToString());
+            var logado = _loginService.VerificaSeEstaLogado(param.Id_Usuario.ToString());
 
             if (!logado)
             {
                 return new ResponseListDTO() { Sucesso = false, Erro = "ACESSO NÃO AUTORIZADO" };
             }
 
-            var result = _LegendariosService.GetAllLegendarios(param);
-
+            var result = _legendarioService.GetAllLegendarios(param);
             return Ok(result);
         }
 
         [HttpGet("trazer/{idlegendario}")]
-        public async Task<ActionResult<ResponseOneDTO>> GetLegendarioById(string idlegendario)
+        public ActionResult<ResponseOneDTO> GetLegendarioById(string idlegendario)
         {
-            var result = await _LegendariosService.GetLegendarioById(idlegendario);
-
+            var result = _legendarioService.GetLegendarioById(idlegendario);
             return Ok(result);
         }
 
         [HttpGet("trazer-all")]
-        public async Task<ActionResult<ResponseListDTO>> GetLegendariosAll()
+        public ActionResult<ResponseListDTO> GetLegendariosAll()
         {
-            var result = await _LegendariosService.GetAllLegendariosAll();
-
+            var result = _legendarioService.GetAllLegendariosAll();
             return Ok(result);
         }
 
         [HttpPut("salvar-legendario")]
-        public async Task<ActionResult<ResponseOneDTO>> PutAtualizarLegendario([FromBody] LegendariosDTO legendario)
+        public ActionResult<ResponseOneDTO> PutAtualizarLegendario([FromBody] LegendariosDTO legendario)
         {
-            var result = await _LegendariosService.SalvarLegendarioById(legendario);
-
+            var result = _legendarioService.SalvarLegendarioById(legendario);
             return Ok(result);
         }
 
-        [HttpGet("diretorio")]
-        public async Task<ActionResult<string>> GetDiretorioAtual()
-        {
-            var Dir = Directory.GetCurrentDirectory();
-            var cert = @$"{Dir}/certificate/certificado.pfx";
-            return Dir + " --- " + cert;
-        }
-
         [HttpGet("logado/{idUsuario}")]
-        public async Task<ActionResult<ResponseOneDTO>> GetLogado(string idUsuario)
+        public ActionResult<ResponseOneDTO> GetLogado(string idUsuario)
         {
             if (idUsuario == "undefined")
-            {
                 idUsuario = "0";
-            }
-            var logado = _LoginService.VerificaSeEstaLogado(idUsuario);
 
-            var response = new ResponseOneDTO
-            {
-                Sucesso = logado
-            };
-
-            return Ok(response);
+            var logado = _loginService.VerificaSeEstaLogado(idUsuario);
+            return Ok(new ResponseOneDTO { Sucesso = logado });
         }
-
-        // ---- endpoints públicos ----
 
         [HttpPost("cadastro-publico")]
         public ActionResult<ResponseOneDTO> PostCadastroPublico([FromBody] LegendariosDTO legendario)
         {
-            var result = _LegendariosService.CadastrarLegendario(legendario);
+            var result = _legendarioService.CadastrarLegendario(legendario);
+            return Ok(result);
+        }
+
+        [HttpGet("paginado")]
+        public ActionResult GetLegendariosPaginado([FromQuery] PaginacaoParams param)
+        {
+            var result = _legendarioService.GetLegendariosPaginado(param);
             return Ok(result);
         }
 
@@ -112,7 +89,7 @@ namespace legendarios_API.Controllers
         [Authorize]
         public ActionResult<ResponseListDTO> GetEstatisticasDashboard()
         {
-            var result = _LegendariosService.GetEstatisticasDashboard();
+            var result = _legendarioService.GetEstatisticasDashboard();
             return Ok(result);
         }
 
@@ -120,7 +97,7 @@ namespace legendarios_API.Controllers
         [Authorize]
         public ActionResult<ResponseListDTO> GetLegendariosPorStatus(string status)
         {
-            var result = _LegendariosService.GetLegendariosPorStatus(status);
+            var result = _legendarioService.GetLegendariosPorStatus(status);
             return Ok(result);
         }
 
@@ -128,9 +105,8 @@ namespace legendarios_API.Controllers
         [Authorize]
         public ActionResult<ResponseOneDTO> PatchStatus(int idLegendario, [FromBody] AtualizarStatusDTO dto)
         {
-            var result = _LegendariosService.AtualizarStatusLegendario(idLegendario, dto.Status);
+            var result = _legendarioService.AtualizarStatusLegendario(idLegendario, dto.Status);
             return Ok(result);
         }
-
     }
 }

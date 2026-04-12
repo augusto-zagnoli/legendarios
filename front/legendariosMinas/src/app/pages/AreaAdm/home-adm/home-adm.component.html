@@ -18,6 +18,14 @@
         <span class="sidebar-label">Cadastros</span>
         <span class="badge bg-warning text-dark sidebar-badge" *ngIf="pendentes > 0">{{ pendentes }}</span>
       </li>
+      <li [class.active]="secaoAtiva === 'eventos'" (click)="secaoAtiva = 'eventos'">
+        <span class="sidebar-icon">📅</span>
+        <span class="sidebar-label">Eventos</span>
+      </li>
+      <li [class.active]="secaoAtiva === 'voluntarios'" (click)="secaoAtiva = 'voluntarios'">
+        <span class="sidebar-icon">🤝</span>
+        <span class="sidebar-label">Voluntários</span>
+      </li>
       <li [class.active]="secaoAtiva === 'anuncios'" (click)="irParaAnuncios()">
         <span class="sidebar-icon">📢</span>
         <span class="sidebar-label">Ações Sociais</span>
@@ -25,6 +33,10 @@
       <li [class.active]="secaoAtiva === 'usuarios'" (click)="irParaUsuarios()">
         <span class="sidebar-icon">🔑</span>
         <span class="sidebar-label">Usuários</span>
+      </li>
+      <li [class.active]="secaoAtiva === 'relatorios'" (click)="secaoAtiva = 'relatorios'">
+        <span class="sidebar-icon">📈</span>
+        <span class="sidebar-label">Relatórios</span>
       </li>
     </ul>
 
@@ -89,6 +101,42 @@
         </div>
       </div>
 
+      <!-- Dashboard V2 Stats -->
+      <div class="row g-3 mb-4" *ngIf="dashStats">
+        <div class="col-6 col-md-3">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <div class="fs-3 fw-bold text-info">{{ dashStats.eventosAtivos }}</div>
+              <div class="text-muted small">Eventos Ativos</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <div class="fs-3 fw-bold text-primary">{{ dashStats.totalInscricoes }}</div>
+              <div class="text-muted small">Inscrições</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <div class="fs-3 fw-bold text-warning">{{ dashStats.checkinsHoje }}</div>
+              <div class="text-muted small">Check-ins Hoje</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <div class="fs-3 fw-bold text-success">{{ dashStats.voluntariosAtivos }}</div>
+              <div class="text-muted small">Voluntários Ativos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row g-3">
         <div class="col-12 col-md-4">
           <div class="card border-0 shadow-sm h-100 text-center p-3 adm-shortcut" (click)="irParaCadastros()">
@@ -98,10 +146,31 @@
           </div>
         </div>
         <div class="col-12 col-md-4">
+          <div class="card border-0 shadow-sm h-100 text-center p-3 adm-shortcut" (click)="secaoAtiva = 'eventos'">
+            <div class="fs-2">📅</div>
+            <div class="fw-bold mt-1">Gerenciar Eventos</div>
+            <div class="text-muted small">{{ dashStats?.eventosAtivos || 0 }} ativo(s)</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card border-0 shadow-sm h-100 text-center p-3 adm-shortcut" (click)="secaoAtiva = 'voluntarios'">
+            <div class="fs-2">🤝</div>
+            <div class="fw-bold mt-1">Voluntários</div>
+            <div class="text-muted small">{{ dashStats?.voluntariosAtivos || 0 }} ativo(s)</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
           <div class="card border-0 shadow-sm h-100 text-center p-3 adm-shortcut" (click)="irParaAnuncios()">
             <div class="fs-2">📢</div>
             <div class="fw-bold mt-1">Ações Sociais</div>
             <div class="text-muted small">{{ listaAnuncios.length }} anúncio(s)</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card border-0 shadow-sm h-100 text-center p-3 adm-shortcut" (click)="secaoAtiva = 'relatorios'">
+            <div class="fs-2">📈</div>
+            <div class="fw-bold mt-1">Relatórios</div>
+            <div class="text-muted small">CSV & Auditoria</div>
           </div>
         </div>
         <div class="col-12 col-md-4">
@@ -375,6 +444,21 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- ══ EVENTOS ══ -->
+    <section *ngIf="secaoAtiva === 'eventos'">
+      <app-eventos-adm></app-eventos-adm>
+    </section>
+
+    <!-- ══ VOLUNTÁRIOS ══ -->
+    <section *ngIf="secaoAtiva === 'voluntarios'">
+      <app-voluntarios-adm></app-voluntarios-adm>
+    </section>
+
+    <!-- ══ RELATÓRIOS ══ -->
+    <section *ngIf="secaoAtiva === 'relatorios'">
+      <app-relatorios-adm></app-relatorios-adm>
     </section>
 
   </main>

@@ -1,21 +1,16 @@
+using legendarios_API.Interfaces;
+using legendarios_API.Middleware;
+using legendarios_API.Repository;
+using legendarios_API.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace legendarios_API
 {
@@ -28,31 +23,18 @@ namespace legendarios_API
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddHttpClient("HttpClientName", client =>
-            {
-                // code to configure headers etc..
-            }).ConfigurePrimaryHttpMessageHandler(() =>
-            {
-                var handler = new HttpClientHandler();
-
-
-                handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
-
-                return handler;
-            });
-
+            // CORS
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", policy => policy
-                                                               .AllowAnyOrigin()
-                                                               .AllowAnyMethod()
-                                                               .AllowAnyHeader());
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
             });
 
+            // Authentication (JWT)
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -69,29 +51,71 @@ namespace legendarios_API
                     };
                 });
 
-            services.AddControllers();
+            // Repositories (DI)
+            services.AddScoped<ILegendariosRepository, LegendariosRepositoryV2>();
+            services.AddScoped<ILoginRepository, LoginRepositoryV2>();
+            services.AddScoped<IAnunciosRepository, AnunciosRepository>();
+            services.AddScoped<IEventosRepository, EventosRepository>();
+            services.AddScoped<IInscricoesRepository, InscricoesRepository>();
+            services.AddScoped<ICheckinRepository, CheckinRepository>();
+            services.AddScoped<IVoluntariosRepository, VoluntariosRepository>();
+            services.AddScoped<IAuditRepository, AuditRepository>();
+
+            // Services (DI)
+            services.AddScoped<ILegendariosService, LegendariosServiceV2>();
+            services.AddScoped<ILoginService, LoginServiceV2>();
+            services.AddScoped<IAnunciosService, AnunciosServiceV2>();
+            services.AddScoped<IEventosService, EventosServiceV2>();
+            services.AddScoped<IInscricoesService, InscricoesServiceV2>();
+            services.AddScoped<ICheckinService, CheckinServiceV2>();
+            services.AddScoped<IVoluntariosService, VoluntariosServiceV2>();
+            services.AddScoped<IAuditService, AuditServiceV2>();
+
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                });
+
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "legendarios_API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Legendários API", Version = "v2" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Insira o token JWT"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        System.Array.Empty<string>()
+                    }
+                });
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // Global error handling
+            app.UseMiddleware<GlobalExceptionMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "legendarios_API v1"));
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Legendários API v2"));
 
             app.UseCors("CorsPolicy");
-
-            //app.UseHttpsRedirection();
-
-            app.UseCertificateForwarding();
 
             app.UseRouting();
 

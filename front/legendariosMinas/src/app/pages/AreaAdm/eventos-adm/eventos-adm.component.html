@@ -1,0 +1,286 @@
+<!-- ══ Lista de Eventos ══ -->
+<div *ngIf="!eventoSelecionado">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="section-title mb-0">Eventos</h4>
+    <button class="btn btn-success btn-sm" (click)="abrirNovoEvento()">+ Novo Evento</button>
+  </div>
+
+  <!-- Busca -->
+  <div class="input-group mb-3" style="max-width: 400px;">
+    <input class="form-control form-control-sm" placeholder="Buscar eventos..." [(ngModel)]="busca" (keyup.enter)="pesquisar()">
+    <button class="btn btn-sm btn-outline-primary" (click)="pesquisar()">Buscar</button>
+  </div>
+
+  <div *ngIf="carregando" class="text-center py-5">
+    <div class="spinner-border text-warning"></div>
+  </div>
+
+  <div class="card shadow-sm border-0" *ngIf="!carregando">
+    <div class="card-body p-0">
+      <div *ngIf="eventos.length === 0" class="text-center text-muted py-5">Nenhum evento encontrado.</div>
+      <div *ngIf="eventos.length > 0">
+        <table mat-table [dataSource]="eventosDataSource" matSort class="w-100">
+
+          <!-- Coluna Nome -->
+          <ng-container matColumnDef="titulo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+            <td mat-cell *matCellDef="let ev" class="fw-semibold">{{ ev.titulo }}</td>
+          </ng-container>
+
+          <!-- Coluna Data -->
+          <ng-container matColumnDef="dataInicio">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Data</th>
+            <td mat-cell *matCellDef="let ev" class="text-nowrap">{{ ev.dataInicio | date:'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+
+          <!-- Coluna Local -->
+          <ng-container matColumnDef="localEvento">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Local</th>
+            <td mat-cell *matCellDef="let ev">{{ ev.localEvento || '—' }}</td>
+          </ng-container>
+
+          <!-- Coluna Vagas -->
+          <ng-container matColumnDef="vagas">
+            <th mat-header-cell *matHeaderCellDef>Vagas</th>
+            <td mat-cell *matCellDef="let ev">
+              <span class="fw-bold" [class.text-danger]="ev.vagasDisponiveis === 0">
+                {{ ev.vagasDisponiveis }}/{{ ev.maxVagas }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Coluna Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+            <td mat-cell *matCellDef="let ev">
+              <span class="badge" [ngClass]="getStatusBadgeClass(ev.status)">{{ ev.status }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Coluna Ações -->
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Ações</th>
+            <td mat-cell *matCellDef="let ev" class="text-center text-nowrap" (click)="$event.stopPropagation()">
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="editarEvento(ev)">Editar</button>
+              <button class="btn btn-sm btn-outline-danger" (click)="confirmarDeletar(ev.idEvento)">Excluir</button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="eventosDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let ev; columns: eventosDisplayedColumns;" style="cursor: pointer;" (click)="abrirDetalhe(ev)"></tr>
+        </table>
+
+        <mat-paginator
+          [length]="totalRegistros"
+          [pageSize]="tamanhoPagina"
+          [pageIndex]="pagina - 1"
+          [pageSizeOptions]="[5, 10, 20, 50]"
+          (page)="onPaginaChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Detalhe do Evento ══ -->
+<div *ngIf="eventoSelecionado">
+  <div class="d-flex align-items-center gap-3 mb-3">
+    <button class="btn btn-sm btn-outline-secondary" (click)="fecharDetalhe()">← Voltar</button>
+    <h4 class="section-title mb-0">{{ eventoSelecionado.titulo }}</h4>
+    <span class="badge" [ngClass]="getStatusBadgeClass(eventoSelecionado.status)">{{ eventoSelecionado.status }}</span>
+  </div>
+
+  <!-- Info cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <div class="fs-3 fw-bold text-primary">{{ eventoSelecionado.maxVagas }}</div>
+          <div class="text-muted small">Vagas Totais</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <div class="fs-3 fw-bold" [class.text-danger]="eventoSelecionado.vagasDisponiveis === 0" [class.text-success]="eventoSelecionado.vagasDisponiveis > 0">
+            {{ eventoSelecionado.vagasDisponiveis }}
+          </div>
+          <div class="text-muted small">Disponíveis</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <div class="fs-3 fw-bold text-info">{{ inscritos.length }}</div>
+          <div class="text-muted small">Inscritos</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <div class="fs-3 fw-bold text-warning">{{ checkins.length }}</div>
+          <div class="text-muted small">Check-ins</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Abas -->
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="abaDetalhe === 'inscritos'" (click)="trocarAbaDetalhe('inscritos')">
+        Inscritos <span class="badge bg-info ms-1">{{ inscritos.length }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="abaDetalhe === 'checkins'" (click)="trocarAbaDetalhe('checkins')">
+        Check-ins <span class="badge bg-warning text-dark ms-1">{{ checkins.length }}</span>
+      </button>
+    </li>
+    <li class="nav-item ms-auto">
+      <button class="btn btn-sm btn-outline-success me-1" (click)="exportarInscritos()" *ngIf="abaDetalhe === 'inscritos'">Exportar CSV</button>
+      <button class="btn btn-sm btn-outline-success" (click)="exportarPresenca()" *ngIf="abaDetalhe === 'checkins'">Exportar CSV</button>
+    </li>
+  </ul>
+
+  <div *ngIf="carregandoDetalhe" class="text-center py-4">
+    <div class="spinner-border spinner-border-sm"></div> Carregando...
+  </div>
+
+  <!-- Tab: Inscritos -->
+  <div class="card shadow-sm border-0" *ngIf="abaDetalhe === 'inscritos' && !carregandoDetalhe">
+    <div class="card-body p-0">
+      <div *ngIf="inscritos.length === 0" class="text-center text-muted py-4">Nenhum inscrito neste evento.</div>
+      <div *ngIf="inscritos.length > 0">
+        <table mat-table [dataSource]="inscritos" class="w-100">
+
+          <!-- Nome -->
+          <ng-container matColumnDef="nomeLegendario">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let insc" class="fw-semibold">{{ insc.nomeLegendario }}</td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let insc">
+              <span class="badge"
+                [class.bg-success]="insc.status === 'confirmada'"
+                [class.bg-warning]="insc.status === 'pendente' || insc.status === 'lista_espera'"
+                [class.bg-danger]="insc.status === 'cancelada'">
+                {{ insc.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Data Inscrição -->
+          <ng-container matColumnDef="dataInscricao">
+            <th mat-header-cell *matHeaderCellDef>Data Inscrição</th>
+            <td mat-cell *matCellDef="let insc">{{ insc.dataInscricao | date:'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+
+          <!-- Observações -->
+          <ng-container matColumnDef="observacoes">
+            <th mat-header-cell *matHeaderCellDef>Observações</th>
+            <td mat-cell *matCellDef="let insc" class="small">{{ insc.observacoes || '—' }}</td>
+          </ng-container>
+
+          <!-- Ações -->
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Ações</th>
+            <td mat-cell *matCellDef="let insc" class="text-center text-nowrap">
+              <button class="btn btn-sm btn-outline-success me-1" *ngIf="insc.status !== 'confirmado' && insc.status !== 'cancelado'"
+                (click)="confirmarInscricao(insc.idInscricao)">Confirmar</button>
+              <button class="btn btn-sm btn-outline-danger" *ngIf="insc.status !== 'cancelado'"
+                (click)="cancelarInscricao(insc.idInscricao)">Cancelar</button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="inscritosDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inscritosDisplayedColumns;"></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Check-ins -->
+  <div *ngIf="abaDetalhe === 'checkins' && !carregandoDetalhe">
+    <!-- Check-in rápido -->
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body">
+        <h6 class="mb-3">Check-in Rápido</h6>
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label small">ID do Legendário</label>
+            <input type="number" class="form-control form-control-sm" [(ngModel)]="checkinIdLegendario" placeholder="ID">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label small">Observações (opcional)</label>
+            <input class="form-control form-control-sm" [(ngModel)]="checkinObs" placeholder="Obs...">
+          </div>
+          <div class="col-md-4">
+            <button class="btn btn-sm btn-primary" (click)="realizarCheckin()" [disabled]="realizandoCheckin || !checkinIdLegendario">
+              <span *ngIf="realizandoCheckin" class="spinner-border spinner-border-sm me-1"></span>
+              Registrar Check-in
+            </button>
+          </div>
+        </div>
+        <div class="mt-2 small" *ngIf="msgCheckin"
+          [class.text-success]="msgCheckin.includes('realizado')"
+          [class.text-danger]="!msgCheckin.includes('realizado')">
+          {{ msgCheckin }}
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <div *ngIf="checkins.length === 0" class="text-center text-muted py-4">Nenhum check-in registrado.</div>
+        <div *ngIf="checkins.length > 0">
+          <table mat-table [dataSource]="checkins" class="w-100">
+
+            <!-- Nome -->
+            <ng-container matColumnDef="nomeLegendario">
+              <th mat-header-cell *matHeaderCellDef>Nome</th>
+              <td mat-cell *matCellDef="let ck" class="fw-semibold">{{ ck.nomeLegendario }}</td>
+            </ng-container>
+
+            <!-- Check-in -->
+            <ng-container matColumnDef="dataCheckin">
+              <th mat-header-cell *matHeaderCellDef>Check-in</th>
+              <td mat-cell *matCellDef="let ck">{{ ck.dataCheckin | date:'dd/MM HH:mm' }}</td>
+            </ng-container>
+
+            <!-- Check-out -->
+            <ng-container matColumnDef="dataCheckout">
+              <th mat-header-cell *matHeaderCellDef>Check-out</th>
+              <td mat-cell *matCellDef="let ck">{{ ck.dataCheckout ? (ck.dataCheckout | date:'dd/MM HH:mm') : '—' }}</td>
+            </ng-container>
+
+            <!-- Observações -->
+            <ng-container matColumnDef="observacoes">
+              <th mat-header-cell *matHeaderCellDef>Observações</th>
+              <td mat-cell *matCellDef="let ck" class="small">{{ ck.observacoes || '—' }}</td>
+            </ng-container>
+
+            <!-- Ações -->
+            <ng-container matColumnDef="acoes">
+              <th mat-header-cell *matHeaderCellDef class="text-center">Ações</th>
+              <td mat-cell *matCellDef="let ck" class="text-center">
+                <button class="btn btn-sm btn-outline-warning" *ngIf="!ck.dataCheckout"
+                  (click)="realizarCheckout(ck.idCheckin)">Check-out</button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="checkinsDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: checkinsDisplayedColumns;"></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

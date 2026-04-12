@@ -16,9 +16,11 @@ export class AcoesSociaisComponent implements OnInit {
 
   ngOnInit(): void {
     this.service.getAnuncios().subscribe({
-      next: (res) => {
-        if (res.sucesso) {
-          this.anuncios = res.data ?? [];
+      next: (res: any) => {
+        const sucesso = res.sucesso ?? res.Sucesso;
+        const data = res.data ?? res.Data;
+        if (sucesso) {
+          this.anuncios = data ?? [];
         } else {
           this.erro = 'Não foi possível carregar os anúncios.';
         }

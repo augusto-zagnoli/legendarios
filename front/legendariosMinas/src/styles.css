@@ -1,1 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Material Dialog z-index fix */
+.cdk-overlay-container {
+  z-index: 1060 !important;
+}
+
+/* Material typography fix for Bootstrap compatibility */
+.mat-form-field {
+  font-size: 14px;
+}
+
+.mat-dialog-container {
+  font-family: inherit;
+}

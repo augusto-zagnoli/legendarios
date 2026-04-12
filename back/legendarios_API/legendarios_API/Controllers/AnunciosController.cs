@@ -1,9 +1,8 @@
 using legendarios_API.DTO;
 using legendarios_API.Entity;
-using legendarios_API.Service;
+using legendarios_API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace legendarios_API.Controllers
 {
@@ -11,11 +10,11 @@ namespace legendarios_API.Controllers
     [Route("anuncios")]
     public class AnunciosController : ControllerBase
     {
-        private readonly AnunciosService _service;
+        private readonly IAnunciosService _service;
 
-        public AnunciosController(IConfiguration configuration)
+        public AnunciosController(IAnunciosService service)
         {
-            _service = new AnunciosService(configuration);
+            _service = service;
         }
 
         // Público — retorna só ativos

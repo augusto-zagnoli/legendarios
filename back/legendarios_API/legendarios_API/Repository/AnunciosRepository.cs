@@ -4,20 +4,16 @@ using Dapper;
 using MySqlConnector;
 using legendarios_API.Entity;
 using legendarios_API.DTO;
+using legendarios_API.Interfaces;
 using Microsoft.Extensions.Configuration;
 
 namespace legendarios_API.Repository
 {
-    public class AnunciosRepository
+    public class AnunciosRepository : BaseRepository, IAnunciosRepository
     {
-        private readonly string _connectionString;
+        public AnunciosRepository(IConfiguration configuration) : base(configuration) { }
 
-        public AnunciosRepository(IConfiguration configuration)
-        {
-            _connectionString = configuration["mysqlStringConnect"];
-        }
-
-        private MySqlConnection Conn() => new MySqlConnection(_connectionString);
+        private MySqlConnection Conn() => CreateConnection();
 
         public AnuncioResponseListDTO GetTodos()
         {

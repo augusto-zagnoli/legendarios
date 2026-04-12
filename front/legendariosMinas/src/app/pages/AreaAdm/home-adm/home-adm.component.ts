@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { PoChartType } from '@po-ui/ng-components';
 import { AuthService } from 'src/app/services/auth.service';
 import { LegendariosPublicoService } from 'src/app/services/legendarios-publico.service';
+import { DashboardService, DashboardStats } from 'src/app/services/dashboard.service';
 
 @Component({
   selector: 'app-home-adm',
@@ -17,6 +18,9 @@ export class HomeAdmComponent implements OnInit {
   aprovados = 0;
   reprovados = 0;
 
+  // Dashboard V2 stats
+  dashStats: DashboardStats | null = null;
+
   // Gráfico
   readonly tipoGrafico = PoChartType.Donut;
   graficoCategorias: string[] = ['Pendentes', 'Aprovados', 'Reprovados'];
@@ -27,7 +31,7 @@ export class HomeAdmComponent implements OnInit {
   ];
 
   // Navegação sidebar
-  secaoAtiva: 'dashboard' | 'cadastros' | 'anuncios' | 'usuarios' = 'dashboard';
+  secaoAtiva: 'dashboard' | 'cadastros' | 'anuncios' | 'usuarios' | 'eventos' | 'voluntarios' | 'relatorios' = 'dashboard';
   sidebarCollapsed = false;
 
   // Tabela
@@ -101,7 +105,8 @@ export class HomeAdmComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private service: LegendariosPublicoService
+    private service: LegendariosPublicoService,
+    private dashboardService: DashboardService
   ) {}
 
   ngOnInit(): void {
@@ -111,13 +116,27 @@ export class HomeAdmComponent implements OnInit {
     }
     this.carregarEstatisticas();
     this.carregarAba('pendente');
+    this.carregarDashboardV2();
+  }
+
+  carregarDashboardV2(): void {
+    this.dashboardService.getStats().subscribe({
+      next: (res: any) => {
+        const sucesso = res.sucesso ?? res.Sucesso;
+        const data = res.data ?? res.Data;
+        if (sucesso) {
+          this.dashStats = data;
+        }
+      }
+    });
   }
 
   carregarEstatisticas(): void {
     this.service.getEstatisticas().subscribe({
-      next: (res) => {
-        if (res.sucesso) {
-          const partes = res.erro.split('|').map(Number);
+      next: (res: any) => {
+        const sucesso = res.sucesso ?? res.Sucesso;
+        if (sucesso) {
+          const partes = (res.erro || res.Erro || '').split('|').map(Number);
           this.totalCadastros = partes[0];
           this.pendentes    = partes[1];
           this.aprovados    = partes[2];
@@ -141,10 +160,12 @@ export class HomeAdmComponent implements OnInit {
     this.mensagemTabela = '';
 
     this.service.getPorStatus(status).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.carregandoTabela = false;
-        if (res.sucesso) {
-          this.listaExibida = res.data || [];
+        const sucesso = res.sucesso ?? res.Sucesso;
+        const data = res.data ?? res.Data;
+        if (sucesso) {
+          this.listaExibida = data || [];
           if (this.listaExibida.length === 0) {
             this.mensagemTabela = 'Nenhum registro encontrado.';
           }
@@ -213,8 +234,10 @@ export class HomeAdmComponent implements OnInit {
   carregarUsuarios(): void {
     this.carregandoUsuarios = true;
     this.service.getUsuarios().subscribe({
-      next: (res) => {
-        this.listaUsuarios = res.sucesso ? (res.data ?? []) : [];
+      next: (res: any) => {
+        const sucesso = res.sucesso ?? res.Sucesso;
+        const data = res.data ?? res.Data;
+        this.listaUsuarios = sucesso ? (data ?? []) : [];
         this.carregandoUsuarios = false;
       },
       error: () => { this.carregandoUsuarios = false; }
@@ -319,8 +342,10 @@ export class HomeAdmComponent implements OnInit {
   carregarAbaAnuncios(): void {
     this.carregandoAnuncios = true;
     this.service.getAnunciosAdm().subscribe({
-      next: (res) => {
-        this.listaAnuncios = res.sucesso ? (res.data ?? []) : [];
+      next: (res: any) => {
+        const sucesso = res.sucesso ?? res.Sucesso;
+        const data = res.data ?? res.Data;
+        this.listaAnuncios = sucesso ? (data ?? []) : [];
         this.carregandoAnuncios = false;
       },
       error: () => { this.carregandoAnuncios = false; }
@@ -355,13 +380,14 @@ export class HomeAdmComponent implements OnInit {
       : this.service.criarAnuncio(this.anuncioForm);
 
     obs.subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.salvandoAnuncio = false;
-        if (res.sucesso) {
+        const sucesso = res.sucesso ?? res.Sucesso;
+        if (sucesso) {
           this.fecharModalAnuncio();
           this.carregarAbaAnuncios();
         } else {
-          this.erroAnuncio = res.erro || 'Erro ao salvar.';
+          this.erroAnuncio = res.erro || res.Erro || 'Erro ao salvar.';
         }
       },
       error: () => {

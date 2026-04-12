@@ -1,0 +1,97 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="section-title mb-0">Voluntários</h4>
+  <button class="btn btn-success btn-sm" (click)="abrirNovo()">+ Novo Voluntário</button>
+</div>
+
+<div class="input-group mb-3" style="max-width: 400px;">
+  <input class="form-control form-control-sm" placeholder="Buscar voluntários..." [(ngModel)]="busca" (keyup.enter)="pesquisar()">
+  <button class="btn btn-sm btn-outline-primary" (click)="pesquisar()">Buscar</button>
+</div>
+
+<div *ngIf="carregando" class="text-center py-5">
+  <div class="spinner-border text-warning"></div>
+</div>
+
+<div class="card shadow-sm border-0" *ngIf="!carregando">
+  <div class="card-body p-0">
+    <div *ngIf="voluntarios.length === 0" class="text-center text-muted py-5">Nenhum voluntário encontrado.</div>
+    <div class="table-responsive" *ngIf="voluntarios.length > 0">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Nome</th>
+            <th>Habilidades</th>
+            <th>Disponibilidade</th>
+            <th>Status</th>
+            <th>Desde</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of voluntarios">
+            <td class="fw-semibold">{{ v.nomeLegendario }}</td>
+            <td class="small">{{ v.habilidades || '—' }}</td>
+            <td class="small">{{ v.disponibilidade || '—' }}</td>
+            <td>
+              <span class="badge" [class.bg-success]="v.ativo" [class.bg-secondary]="!v.ativo">
+                {{ v.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td class="text-nowrap small">{{ v.dataCadastro | date:'dd/MM/yyyy' }}</td>
+            <td class="text-center text-nowrap">
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="editar(v)">Editar</button>
+              <button class="btn btn-sm btn-outline-danger" (click)="confirmarDeletar(v.idVoluntario)">Remover</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center" *ngIf="totalPaginas > 1">
+    <span class="small text-muted">{{ totalRegistros }} registro(s) · Página {{ pagina }}/{{ totalPaginas }}</span>
+    <div>
+      <button class="btn btn-sm btn-outline-secondary me-1" [disabled]="pagina <= 1" (click)="irPagina(pagina - 1)">‹ Anterior</button>
+      <button class="btn btn-sm btn-outline-secondary" [disabled]="pagina >= totalPaginas" (click)="irPagina(pagina + 1)">Próxima ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal Voluntário ══ -->
+<div class="modal-backdrop fade show" *ngIf="modalVisivel" style="z-index:1040;"></div>
+<div class="modal d-block" tabindex="-1" *ngIf="modalVisivel" style="z-index:1050;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ form.idVoluntario ? 'Editar' : 'Novo' }} Voluntário</h5>
+        <button type="button" class="btn-close" (click)="fecharModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger py-2" *ngIf="erro">{{ erro }}</div>
+        <div class="mb-3">
+          <label class="form-label">ID do Legendário <span class="text-danger">*</span></label>
+          <input type="number" class="form-control" [(ngModel)]="form.idLegendario" [disabled]="!!form.idVoluntario">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Habilidades</label>
+          <input class="form-control" [(ngModel)]="form.habilidades" placeholder="Ex: primeiros socorros, cozinha, etc.">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Disponibilidade</label>
+          <input class="form-control" [(ngModel)]="form.disponibilidade" placeholder="Ex: fins de semana, integral, etc.">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Área de Atuação</label>
+          <input class="form-control" [(ngModel)]="form.areaAtuacao" placeholder="Ex: logística, alimentação, etc.">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fecharModal()" [disabled]="salvando">Cancelar</button>
+        <button class="btn btn-primary" (click)="salvar()" [disabled]="salvando">
+          <span *ngIf="salvando" class="spinner-border spinner-border-sm me-1"></span>
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

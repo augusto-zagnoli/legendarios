@@ -1,13 +1,10 @@
 ﻿using legendarios_API.DTO;
-using legendarios_API.Service;
+using legendarios_API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using legendarios_API.Entity;
 
 namespace legendarios_API.Controllers
 {
@@ -16,12 +13,12 @@ namespace legendarios_API.Controllers
     public class LoginController : ControllerBase
     {
         private readonly ILogger<LoginController> _logger;
-        private readonly LoginService _loginService;
+        private readonly ILoginService _loginService;
 
-        public LoginController(ILogger<LoginController> logger, IConfiguration configuration)
+        public LoginController(ILogger<LoginController> logger, ILoginService loginService)
         {
             _logger = logger;
-            _loginService = new LoginService(configuration);
+            _loginService = loginService;
         }
 
         [HttpPost("/adm-login")]
@@ -29,11 +26,11 @@ namespace legendarios_API.Controllers
         {
             try
             {
-                var result = _loginService.RealizarLoguin(parans);
-
+                var result = _loginService.RealizarLogin(parans);
                 if (result == null)
                     return Unauthorized(new { mensagem = "Usuário ou senha inválidos." });
 
+                // CamelCase é aplicado automaticamente pelo JsonSerializerOptions
                 return Ok(result);
             }
             catch (Exception ex)

@@ -4,8 +4,10 @@
 
 export const environment = {
   production: false,
-  baseURL: "https://legendarios.cloud:5000/"
+  baseURL: "https://legendarios.cloud:5000/",
+  apiURL: "https://legendarios.cloud:5000/api/"
   //baseURL: "https://localhost:5001/"
+  //apiURL: "https://localhost:5001/api/"
 };
 
 /*
